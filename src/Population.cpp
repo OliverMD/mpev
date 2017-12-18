@@ -3,6 +3,6 @@
 //
 #include "include/Population.h"
 
-std::unique_ptr<PopulationState> InitialPopState::execute(Population& pop) {
-    return nullptr;
+std::unique_ptr<PopulationState> InitialPopState::execute(Population &pop) {
+  return nullptr;
 }

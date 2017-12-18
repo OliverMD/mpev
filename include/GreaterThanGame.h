@@ -8,17 +8,18 @@
 #include <cstdint>
 
 namespace GTG {
-    class GreaterThanPlayer {
-    public:
-        uint16_t GetRepr() { return value; }
-        void mutate();
-    private:
-        uint16_t value;
-    };
-    class GreaterThanGame {
-    public:
-        uint8_t PlayTwo(GreaterThanPlayer p1, GreaterThanPlayer p2);
-    };
-}
+class GreaterThanPlayer {
+public:
+  uint16_t GetRepr() { return value; }
+  void mutate();
 
-#endif //GREATERTHANGAME_GREATERTHANGAME_H
+private:
+  uint16_t value;
+};
+class GreaterThanGame {
+public:
+  uint8_t PlayTwo(GreaterThanPlayer p1, GreaterThanPlayer p2);
+};
+} // namespace GTG
+
+#endif // GREATERTHANGAME_GREATERTHANGAME_H

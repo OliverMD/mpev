@@ -15,39 +15,40 @@ class Population;
  */
 class PopulationState {
 public:
+  /**
+   * void execute(Population& p)
+   * execute the state.
+   *
+   * @return The new state, nullptr if no change
+   */
+  virtual std::unique_ptr<PopulationState> execute(Population &pop) = 0;
 
-    /**
-     * void execute(Population& p)
-     * execute the state.
-     *
-     * @return The new state, nullptr if no change
-     */
-    virtual std::unique_ptr<PopulationState> execute(Population& pop) = 0;
-
-    /**
-     *
-     * @return the name of the state
-     */
-    virtual std::string name() const = 0;
+  /**
+   *
+   * @return the name of the state
+   */
+  virtual std::string name() const = 0;
 };
 
 class InitialPopState : public PopulationState {
 public:
-    std::unique_ptr<PopulationState> execute(Population& pop) override;
-    std::string name() const override { return "InitialPopState"; }
+  std::unique_ptr<PopulationState> execute(Population &pop) override;
+  std::string name() const override { return "InitialPopState"; }
 };
 
 class Population {
 public:
-    Population() : state{new InitialPopState()} {}
-    Population(std::unique_ptr<PopulationState> startState) : state{std::move(startState)} {}
-    void step() {
-        auto newState = state->execute(*this);
-        if (newState != nullptr) {
-            state = std::move(newState);
-        }
+  Population() : state{new InitialPopState()} {}
+  Population(std::unique_ptr<PopulationState> startState)
+      : state{std::move(startState)} {}
+  void step() {
+    auto newState = state->execute(*this);
+    if (newState != nullptr) {
+      state = std::move(newState);
     }
-    const PopulationState* getState() const { return state.get();}
+  }
+  const PopulationState *getState() const { return state.get(); }
+
 private:
-    std::unique_ptr<PopulationState> state;
+  std::unique_ptr<PopulationState> state;
 };

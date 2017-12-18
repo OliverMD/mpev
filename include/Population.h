@@ -40,6 +40,7 @@ public:
 class Population {
 public:
     Population() : state{new InitialPopState()} {}
+    Population(std::unique_ptr<PopulationState> startState) : state{std::move(startState)} {}
     void step() {
         auto newState = state->execute(*this);
         if (newState != nullptr) {

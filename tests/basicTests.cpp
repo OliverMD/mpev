@@ -11,4 +11,6 @@ TEST(BasicTests, Sanity) {
 TEST(BasicTests, Population) {
     Population pop;
     EXPECT_EQ("InitialPopState", pop.getState()->name());
+    Population newPop(std::make_unique<InitialPopState>());
+    EXPECT_EQ("InitialPopState", newPop.getState()->name());
 }

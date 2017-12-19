@@ -6,6 +6,9 @@
 
 #include <memory>
 #include <string>
+#include <vector>
+
+#include "include/Individual.h"
 
 class Population;
 
@@ -41,6 +44,7 @@ public:
   Population() : state{new InitialPopState()} {}
   Population(std::unique_ptr<PopulationState> startState)
       : state{std::move(startState)} {}
+
   void step() {
     auto newState = state->execute(*this);
     if (newState != nullptr) {
@@ -49,6 +53,14 @@ public:
   }
   const PopulationState *getState() const { return state.get(); }
 
+  void replacePopulation(std::vector<Individual> newPop) {
+    currentInds.swap(newPop);
+  }
+
+  const std::vector<Individual> &getReadOnlyPopulation() const {
+    return currentInds;
+  };
 private:
   std::unique_ptr<PopulationState> state;
+  std::vector<Individual> currentInds;
 };

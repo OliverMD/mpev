@@ -49,6 +49,9 @@ endif()
 
 
 include_directories(before ${CMAKE_CURRENT_SOURCE_DIR})
+file(GLOB INCLUDES
+        "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h"
+        )
 
 include_directories(AFTER
         ${gtest_SOURCE_DIR}/include

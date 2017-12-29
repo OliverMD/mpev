@@ -11,7 +11,8 @@
 #include "include/Individual.h"
 
 class Population;
-
+class FitnessManager;
+//class FitnessManager::iterator;
 /*
  * Interface for population states
  * May need to become an abstract class in the future
@@ -41,9 +42,10 @@ public:
 
 class Population {
 public:
-  Population() : state{new InitialPopState()} {}
+
+  Population() : id{CURRENTID++}, state{new InitialPopState()} {}
   Population(std::unique_ptr<PopulationState> startState)
-      : state{std::move(startState)} {}
+      : id{CURRENTID++}, state{std::move(startState)} {}
 
   void step() {
     auto newState = state->execute(*this);
@@ -57,10 +59,31 @@ public:
     currentInds.swap(newPop);
   }
 
-  const std::vector<Individual> &getReadOnlyPopulation() const {
-    return currentInds;
+  auto cbegin() const {
+    return std::cbegin(currentInds);
   };
+
+  auto cend() const {
+    return std::cend(currentInds);
+  }
+
+  auto begin() {
+    return std::begin(currentInds);
+  }
+
+  auto end() {
+    return std::end(currentInds);
+  }
+
+  size_t size() {
+    return currentInds.size();
+  }
+
+  uint32_t getId() { return id; }
+
 private:
+  static std::atomic<uint32_t> CURRENTID;
+  const uint32_t id;
   std::unique_ptr<PopulationState> state;
   std::vector<Individual> currentInds;
 };

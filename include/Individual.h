@@ -3,6 +3,8 @@
 //
 #pragma once
 
+#include <string>
+
 class IndividualRep {
 public:
   virtual std::string name() = 0;

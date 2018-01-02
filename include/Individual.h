@@ -27,3 +27,9 @@ struct Individual {
   std::unique_ptr<IndividualRep> representation;
   float fitness;
 };
+
+/**
+ * Basic Int individual maker
+ * @return A random Individual with an IntIndividualRep
+ */
+Individual makeRandomIntIndivdual();

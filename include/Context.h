@@ -4,8 +4,8 @@
 #pragma once
 
 #include "Individual.h"
-#include "Fitness.h"
 
+class FitnessManager;
 /**
  * Context class that stores various helper functions and utilities and
  * parameters used during evolution.
@@ -14,4 +14,5 @@ struct Context {
   using IndividualMaker = decltype(makeRandomIntIndivdual);
 
   std::unique_ptr<FitnessManager> fitnessManager;
+  IndividualMaker individualMaker;
 };

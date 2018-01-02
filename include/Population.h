@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "include/Individual.h"
+#include "Context.h"
 
 class Population;
 class FitnessManager;
@@ -36,14 +37,16 @@ public:
 
 class InitialPopState : public PopulationState {
 public:
+  InitialPopState(Context& ctx) : ctx{ctx} {}
   std::unique_ptr<PopulationState> execute(Population &pop) override;
   std::string name() const override { return "InitialPopState"; }
+private:
+  Context& ctx;
 };
 
 class Population {
 public:
 
-  Population() : id{CURRENTID++}, state{new InitialPopState()} {}
   Population(std::unique_ptr<PopulationState> startState)
       : id{CURRENTID++}, state{std::move(startState)} {}
 

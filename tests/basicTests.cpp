@@ -8,9 +8,8 @@
 TEST(BasicTests, Sanity) { EXPECT_EQ(0, 0); }
 
 TEST(BasicTests, Population) {
-  Population pop;
-  EXPECT_EQ("InitialPopState", pop.getState()->name());
-  Population newPop(std::make_unique<InitialPopState>());
+  Context ctx;
+  Population newPop(std::make_unique<InitialPopState>(ctx));
   EXPECT_EQ("InitialPopState", newPop.getState()->name());
 
   std::vector<Individual> test;
@@ -24,9 +23,10 @@ TEST(BasicTests, Population) {
 
 TEST(BasicTests, FitnessManagerIterator) {
   FitnessManager fitman{3};
+  Context ctx;
 
-  Population popOne;
-  Population popTwo;
+  Population popOne{std::make_unique<InitialPopState>(ctx)};
+  Population popTwo{std::make_unique<InitialPopState>(ctx)};
 
   std::vector<Individual> test;
 
@@ -56,8 +56,10 @@ TEST(BasicTests, FitnessManagerIterator) {
 TEST(BasicTests, FitnessManager) {
   FitnessManager fitman{2};
 
-  Population popOne;
-  Population popTwo;
+  Context ctx;
+
+  Population popOne{std::make_unique<InitialPopState>(ctx)};
+  Population popTwo{std::make_unique<InitialPopState>(ctx)};
 
   std::vector<Individual> test;
 

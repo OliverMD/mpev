@@ -4,6 +4,23 @@
 
 #include "include/PopulationStates.h"
 
+const std::string EvaluateFitnessState::Name = "EvaluateFitnessState";
+
+std::unique_ptr<PopulationState> InitialPopState::execute(Population &pop) {
+  return std::make_unique<GeneratePopState>(ctx);
+}
+
+std::unique_ptr<PopulationState> GeneratePopState::execute(Population &pop) {
+  std::vector<Individual> inds;
+  inds.reserve(ctx.popSize);
+
+  for (Context::PopSizeType i = 0; i < ctx.popSize; ++i) {
+    inds.push_back(ctx.individualMaker());
+  }
+
+  return std::make_unique<EvaluateFitnessState>();
+}
+
 std::unique_ptr<PopulationState> EvaluateFitnessState::execute(Population &pop) {
   // Slightly complex under coevolution as we need other populations to
 

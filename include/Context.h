@@ -11,8 +11,10 @@ class FitnessManager;
  * parameters used during evolution.
  */
 struct Context {
-  using IndividualMaker = decltype(makeRandomIntIndivdual);
+  using IndividualMaker = decltype(&makeRandomIntIndivdual);
+  using PopSizeType = uint32_t;
 
   std::unique_ptr<FitnessManager> fitnessManager;
   IndividualMaker individualMaker;
+  PopSizeType popSize;
 };

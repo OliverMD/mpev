@@ -78,7 +78,7 @@ TEST(BasicTests, FitnessManager) {
   auto seqTwo = fitman.readySignal(&popTwo);
 
   EXPECT_EQ(seqOne, 0);
-  EXPECT_EQ(seqTwo, 1);
+  EXPECT_EQ(seqTwo, 0);
 
   EXPECT_EQ(popOne.begin()->fitness, 88);
   EXPECT_EQ(popTwo.begin()->fitness, 88);

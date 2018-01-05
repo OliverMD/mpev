@@ -15,11 +15,13 @@ uint32_t FitnessManager::readySignal(Population *const pop) {
     pops.insert({pop->getId(), pop});
   }
 
+  // runEvaluation may alter the sequence number, so take a copy here.
+  uint32_t oldSeq = seqNo;
   if (pops.size() == numPops) {
     // Ready to run the evaluation
     runEvaluation();
   }
-  return seqNo;
+  return oldSeq;
 }
 
 std::optional<uint32_t> FitnessManager::lastEvaluation() {

@@ -23,13 +23,10 @@ public:
   /**
    *
    * @param numOfPops: The number of populations to wait for and evaluate
-   * fitness for. Must be over 1.
+   * fitness for.
    */
   FitnessManager(uint16_t numOfPops)
       : numPops{numOfPops}, fitnessFunction{&identityFitnessFunc}, seqNo{0} {
-    if (numOfPops <= 1) {
-      throw std::invalid_argument("numOfPops must be greater than 1!");
-    }
   }
 
   /**

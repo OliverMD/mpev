@@ -6,6 +6,8 @@
 #include "include/Fitness.h"
 
 const std::string EvaluateFitnessState::Name = "EvaluateFitnessState";
+const std::string GeneratePopState::Name = "GeneratePopState";
+const std::string VariationState::Name = "VariationState";
 
 std::unique_ptr<PopulationState> InitialPopState::execute(Population &pop) {
   return std::make_unique<GeneratePopState>(ctx);

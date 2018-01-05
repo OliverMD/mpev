@@ -8,9 +8,10 @@
 
 class GeneratePopState : public PopulationState {
 public:
+  static const std::string Name;
   GeneratePopState(Context& ctx) : ctx{ctx} {}
   std::unique_ptr<PopulationState> execute(Population &pop) override;
-  std::string name() const override { return "GeneratePopState"; }
+  std::string name() const override { return Name; }
 private:
   Context& ctx;
 };
@@ -28,6 +29,7 @@ private:
 
 class VariationState : public PopulationState {
 public:
+  static const std::string Name;
   std::unique_ptr<PopulationState> execute(Population &pop) override;
-  std::string name() const override { return "VariationState"; }
+  std::string name() const override { return Name; }
 };

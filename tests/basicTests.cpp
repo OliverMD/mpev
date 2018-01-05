@@ -126,7 +126,7 @@ TEST(BasicTests, EvalFitnessPopState_OnePop) {
 
   newPop.step();
 
-  EXPECT_EQ(newPop.getState()->name(), "VariationState");
+  EXPECT_EQ(newPop.getState()->name(), VariationState::Name);
 
   int testVal = 0;
   for (const auto &ind : newPop) {

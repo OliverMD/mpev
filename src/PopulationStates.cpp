@@ -3,6 +3,7 @@
 //
 
 #include "include/PopulationStates.h"
+#include "include/Fitness.h"
 
 const std::string EvaluateFitnessState::Name = "EvaluateFitnessState";
 
@@ -18,7 +19,7 @@ std::unique_ptr<PopulationState> GeneratePopState::execute(Population &pop) {
     inds.push_back(ctx.individualMaker());
   }
 
-  return std::make_unique<EvaluateFitnessState>();
+  return std::make_unique<EvaluateFitnessState>(ctx);
 }
 
 std::unique_ptr<PopulationState> EvaluateFitnessState::execute(Population &pop) {
@@ -28,4 +29,19 @@ std::unique_ptr<PopulationState> EvaluateFitnessState::execute(Population &pop) 
   // away if all other relevant populations are ready.
   // Every time this is run check if the fitness evaluation has been done and
   // change states if it has.
+
+  if (!registeredSeqno.has_value()) {
+    registeredSeqno = ctx.fitnessManager->readySignal(&pop);
+  }
+
+  auto last = ctx.fitnessManager->lastEvaluation();
+  if (last.has_value() && last.value() >= registeredSeqno.value()) {
+    return std::make_unique<VariationState>();
+  }
+
+  return nullptr;
+}
+
+std::unique_ptr<PopulationState> VariationState::execute(Population &pop) {
+
 }

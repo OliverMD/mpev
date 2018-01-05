@@ -108,3 +108,32 @@ TEST(BasicTests, GeneratePopState) {
         ++testVal);
   }
 }
+
+TEST(BasicTests, EvalFitnessPopState_OnePop) {
+  Context ctx;
+  ctx.popSize = 3;
+  ctx.individualMaker = &makeIntIndividual;
+  ctx.fitnessManager = std::make_unique<FitnessManager>(1);
+  ctx.fitnessManager->changeFitnessFunction([](const IndividualRep*, const IndividualRep*)->float{
+    return 50;
+  });
+  Population newPop(std::make_unique<InitialPopState>(ctx));
+
+  newPop.step();
+  newPop.step();
+
+  EXPECT_EQ(newPop.getState()->name(), EvaluateFitnessState::Name);
+
+  newPop.step();
+
+  EXPECT_EQ(newPop.getState()->name(), "VariationState");
+
+  int testVal = 0;
+  for (const auto &ind : newPop) {
+    EXPECT_EQ(ind.representation->name(), "int");
+    EXPECT_EQ(
+        static_cast<IntIndividualRep *>(ind.representation.get())->getValue(),
+        ++testVal);
+    EXPECT_EQ(ind.fitness, 50);
+  }
+}

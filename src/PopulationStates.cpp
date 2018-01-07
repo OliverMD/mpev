@@ -66,9 +66,16 @@ Individual& VariationState::tournamentSelectInd(Population& p) {
 }
 
 std::unique_ptr<PopulationState> VariationState::execute(Population &pop) {
+  pop.newInds.reserve(pop.size());
   for (size_t i = 0; i < pop.size(); ++i) {
     auto ind = ctx.crossoverFunc(tournamentSelectInd(pop), tournamentSelectInd(pop));
     pop.newInds.emplace_back(ctx.mutationFunc(ind));
   }
-  return nullptr;
+  return std::make_unique<SurvivalState>(ctx);
+}
+
+std::unique_ptr<PopulationState> SurvivalState::execute(Population &pop) {
+  pop.replacePopulation(std::move(pop.newInds));
+  pop.newInds.clear();
+  return std::make_unique<EvaluateFitnessState>(ctx);
 }

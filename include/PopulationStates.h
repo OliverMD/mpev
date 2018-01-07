@@ -46,5 +46,4 @@ public:
   std::string name() const override { return Name; }
 private:
   Context& ctx;
-
 };

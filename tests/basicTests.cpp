@@ -170,3 +170,54 @@ TEST(BasicTests, VariationPopState_OnePop) {
 
   EXPECT_EQ(newPop.size(), newPop.newInds.size());
 }
+
+TEST(BasicTests, VariationPopState_TwoPop) {
+  Context ctx;
+  ctx.popSize = 3;
+  ctx.individualMaker = &makeIntIndividual;
+  ctx.fitnessManager = std::make_unique<FitnessManager>(2);
+  ctx.fitnessManager->changeFitnessFunction([](const IndividualRep*, const IndividualRep*)->float{
+    return 50;
+  });
+  Population newPop(std::make_unique<InitialPopState>(ctx));
+  Population popTwo(std::make_unique<InitialPopState>(ctx));
+
+  newPop.step();
+  popTwo.step();
+  newPop.step();
+  popTwo.step();
+
+  EXPECT_EQ(newPop.getState()->name(), EvaluateFitnessState::Name);
+  EXPECT_EQ(popTwo.getState()->name(), EvaluateFitnessState::Name);
+
+  newPop.step();
+  popTwo.step();
+
+  EXPECT_EQ(popTwo.getState()->name(), VariationState::Name);
+  newPop.step(); // Need to step to pickup change
+  EXPECT_EQ(newPop.getState()->name(), VariationState::Name);
+
+  int testVal = 0;
+  for (const auto &ind : newPop) {
+    EXPECT_EQ(ind.representation->name(), "int");
+    EXPECT_EQ(
+        static_cast<IntIndividualRep *>(ind.representation.get())->getValue(),
+        ++testVal);
+    EXPECT_EQ(ind.fitness, 50);
+  }
+
+  testVal = 0;
+  for (const auto &ind : popTwo) {
+    EXPECT_EQ(ind.representation->name(), "int");
+    EXPECT_EQ(
+        static_cast<IntIndividualRep *>(ind.representation.get())->getValue(),
+        ++testVal);
+    EXPECT_EQ(ind.fitness, 50);
+  }
+
+  newPop.step();
+  popTwo.step();
+
+  EXPECT_EQ(newPop.size(), newPop.newInds.size());
+  EXPECT_EQ(popTwo.size(), popTwo.newInds.size());
+}

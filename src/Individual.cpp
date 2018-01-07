@@ -27,8 +27,7 @@ Individual mutateIntIndividual(Individual &a) {
       rd; // Will be used to obtain a seed for the random number engine
   static std::mt19937 gen(
       rd()); // Standard mersenne_twister_engine seeded with rd()
-  static std::uniform_int_distribution<int> dis(
-      std::numeric_limits<int>::min());
+  static std::uniform_int_distribution<int> dis(-10, 10);
 
   return {
       std::make_unique<IntIndividualRep>(

@@ -33,3 +33,7 @@ struct Individual {
  * @return A random Individual with an IntIndividualRep
  */
 Individual makeRandomIntIndivdual();
+
+Individual crossoverIntIndividuals(Individual& a, Individual& b);
+
+Individual mutateIntIndividual(Individual& a);

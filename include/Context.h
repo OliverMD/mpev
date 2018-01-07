@@ -12,9 +12,14 @@ class FitnessManager;
  */
 struct Context {
   using IndividualMaker = decltype(&makeRandomIntIndivdual);
+  using CrossoverFunc = decltype(&crossoverIntIndividuals);
+  using MutationFunc = decltype(&mutateIntIndividual);
   using PopSizeType = uint32_t;
 
   std::unique_ptr<FitnessManager> fitnessManager;
   IndividualMaker individualMaker;
+  CrossoverFunc crossoverFunc;
+  MutationFunc mutationFunc;
   PopSizeType popSize;
+  size_t tournSize;
 };

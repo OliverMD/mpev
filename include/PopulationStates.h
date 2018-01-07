@@ -30,6 +30,21 @@ private:
 class VariationState : public PopulationState {
 public:
   static const std::string Name;
+  VariationState(Context& ctx) : ctx{ctx} {}
   std::unique_ptr<PopulationState> execute(Population &pop) override;
   std::string name() const override { return Name; }
+private:
+  Context& ctx;
+  Individual& tournamentSelectInd(Population& p);
+};
+
+class SurvivalState : public PopulationState {
+public:
+  static const std::string Name;
+  SurvivalState(Context& ctx) : ctx{ctx} {}
+  std::unique_ptr<PopulationState> execute(Population &pop) override;
+  std::string name() const override { return Name; }
+private:
+  Context& ctx;
+
 };

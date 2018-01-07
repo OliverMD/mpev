@@ -84,9 +84,11 @@ public:
 
   uint32_t getId() { return id; }
 
+  std::vector<Individual> newInds;
+  std::vector<Individual> currentInds;
+
 private:
   static std::atomic<uint32_t> CURRENTID;
   const uint32_t id;
   std::unique_ptr<PopulationState> state;
-  std::vector<Individual> currentInds;
 };

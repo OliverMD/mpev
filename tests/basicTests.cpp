@@ -176,8 +176,9 @@ TEST(BasicTests, VariationPopState_TwoPop) {
   ctx.popSize = 3;
   ctx.individualMaker = &makeIntIndividual;
   ctx.fitnessManager = std::make_unique<FitnessManager>(2);
-  ctx.fitnessManager->changeFitnessFunction([](const IndividualRep*, const IndividualRep*)->float{
-    return 50;
+  float expFitness = 50;
+  ctx.fitnessManager->changeFitnessFunction([& expFitness](const IndividualRep*, const IndividualRep*)->float{
+    return expFitness;
   });
   Population newPop(std::make_unique<InitialPopState>(ctx));
   Population popTwo(std::make_unique<InitialPopState>(ctx));

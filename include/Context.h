@@ -5,15 +5,17 @@
 
 #include "Individual.h"
 
+#include <functional>
+
 class FitnessManager;
 /**
  * Context class that stores various helper functions and utilities and
  * parameters used during evolution.
  */
 struct Context {
-  using IndividualMaker = decltype(&makeRandomIntIndivdual);
-  using CrossoverFunc = decltype(&crossoverIntIndividuals);
-  using MutationFunc = decltype(&mutateIntIndividual);
+  using IndividualMaker = std::function<decltype(makeRandomIntIndivdual)>;
+  using CrossoverFunc = std::function<decltype(crossoverIntIndividuals)>;
+  using MutationFunc = std::function<decltype(mutateIntIndividual)>;
   using PopSizeType = uint32_t;
 
   std::unique_ptr<FitnessManager> fitnessManager;

@@ -17,7 +17,7 @@ float identityFitnessFunc(const IndividualRep *, const IndividualRep *);
  */
 class FitnessManager {
 public:
-  using FitnessFunction = decltype(&identityFitnessFunc);
+  using FitnessFunction = std::function<decltype(identityFitnessFunc)>;
   using PopStore = std::unordered_map<uint32_t, Population *const>;
 
   /**

@@ -7,21 +7,22 @@
 
 #include <functional>
 
-class FitnessManager;
+template <typename FitEv> class FitnessManager;
 /**
  * Context class that stores various helper functions and utilities and
  * parameters used during evolution.
  */
-struct Context {
+template <typename FitEv> struct Context {
   using IndividualMaker = std::function<decltype(makeRandomIntIndivdual)>;
   using CrossoverFunc = std::function<decltype(crossoverIntIndividuals)>;
   using MutationFunc = std::function<decltype(mutateIntIndividual)>;
   using PopSizeType = uint32_t;
 
-  std::unique_ptr<FitnessManager> fitnessManager;
+  std::unique_ptr<FitnessManager<FitEv>> fitnessManager;
   IndividualMaker individualMaker;
   CrossoverFunc crossoverFunc;
   MutationFunc mutationFunc;
   PopSizeType popSize;
   size_t tournSize;
+  size_t numOfOpponents;
 };

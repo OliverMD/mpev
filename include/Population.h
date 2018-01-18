@@ -8,17 +8,18 @@
 #include <string>
 #include <vector>
 
-#include "include/Individual.h"
 #include "Context.h"
+#include "include/Individual.h"
 
-class Population;
-class FitnessManager;
-//class FitnessManager::iterator;
+template <typename FitEv> class Population;
+
+template <typename FitEv> class FitnessManager;
+// class FitnessManager::iterator;
 /*
  * Interface for population states
  * May need to become an abstract class in the future
  */
-class PopulationState {
+template <typename FitEv> class PopulationState {
 public:
   /**
    * void execute(Population& p)
@@ -26,7 +27,8 @@ public:
    *
    * @return The new state, nullptr if no change
    */
-  virtual std::unique_ptr<PopulationState> execute(Population &pop) = 0;
+  virtual std::unique_ptr<PopulationState<FitEv>>
+  execute(Population<FitEv> &pop) = 0;
 
   /**
    *
@@ -35,19 +37,25 @@ public:
   virtual std::string name() const = 0;
 };
 
-class InitialPopState : public PopulationState {
+template <typename FitEv> class GeneratePopState;
+
+template <typename FitEv>
+class InitialPopState : public PopulationState<FitEv> {
 public:
-  InitialPopState(Context& ctx) : ctx{ctx} {}
-  std::unique_ptr<PopulationState> execute(Population &pop) override;
+  InitialPopState(Context<FitEv> &ctx) : ctx{ctx} {}
+  std::unique_ptr<PopulationState<FitEv>>
+  execute(Population<FitEv> &pop) override {
+    return std::make_unique<GeneratePopState<FitEv>>(ctx);
+  }
   std::string name() const override { return "InitialPopState"; }
+
 private:
-  Context& ctx;
+  Context<FitEv> &ctx;
 };
 
-class Population {
+template <typename FitEv> class Population {
 public:
-
-  Population(std::unique_ptr<PopulationState> startState)
+  Population(std::unique_ptr<PopulationState<FitEv>> startState)
       : id{CURRENTID++}, state{std::move(startState)} {}
 
   void step() {
@@ -56,31 +64,21 @@ public:
       state = std::move(newState);
     }
   }
-  const PopulationState *getState() const { return state.get(); }
+  const PopulationState<FitEv> *getState() const { return state.get(); }
 
   void replacePopulation(std::vector<Individual> newPop) {
     currentInds.swap(newPop);
   }
 
-  auto cbegin() const {
-    return std::cbegin(currentInds);
-  };
+  auto cbegin() const { return std::cbegin(currentInds); };
 
-  auto cend() const {
-    return std::cend(currentInds);
-  }
+  auto cend() const { return std::cend(currentInds); }
 
-  auto begin() {
-    return std::begin(currentInds);
-  }
+  auto begin() { return std::begin(currentInds); }
 
-  auto end() {
-    return std::end(currentInds);
-  }
+  auto end() { return std::end(currentInds); }
 
-  size_t size() {
-    return currentInds.size();
-  }
+  size_t size() { return currentInds.size(); }
 
   uint32_t getId() { return id; }
 
@@ -90,5 +88,8 @@ public:
 private:
   static std::atomic<uint32_t> CURRENTID;
   const uint32_t id;
-  std::unique_ptr<PopulationState> state;
+  std::unique_ptr<PopulationState<FitEv>> state;
 };
+
+template <typename FitEv>
+std::atomic<uint32_t> Population<FitEv>::CURRENTID = 0;

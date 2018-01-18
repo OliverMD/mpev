@@ -12,8 +12,7 @@
 #include "Context.h"
 
 class Population;
-class FitnessManager;
-//class FitnessManager::iterator;
+
 /*
  * Interface for population states
  * May need to become an abstract class in the future

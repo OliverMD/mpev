@@ -1,10 +1,10 @@
 //
 // Created by odownard on 03/11/17.
 //
-#include <include/PopulationStates.h>
 #include "gtgTest.h"
 #include "include/Fitness.h"
 #include "include/Population.h"
+#include <include/PopulationStates.h>
 
 TEST(BasicTests, Sanity) { EXPECT_EQ(0, 0); }
 
@@ -23,7 +23,10 @@ TEST(BasicTests, Population) {
 }
 
 TEST(BasicTests, FitnessManagerIterator) {
-  FitnessManager fitman{3};
+  auto fit = [](const IndividualRep *a, const IndividualRep *b) {
+    return (float)88;
+  };
+  CoevFitnessManager<DefaultFitnessEv<fit>> fitman{3, 1};
   Context ctx;
 
   Population popOne{std::make_unique<InitialPopState>(ctx)};
@@ -38,9 +41,6 @@ TEST(BasicTests, FitnessManagerIterator) {
 
   test.emplace_back(std::make_unique<IntIndividualRep>(48), 0);
   popTwo.replacePopulation(std::move(test));
-
-  fitman.changeFitnessFunction(
-      [](const IndividualRep *a, const IndividualRep *b) { return (float)88; });
 
   // Test iterator
   auto seqOne = fitman.readySignal(&popOne);
@@ -53,7 +53,10 @@ TEST(BasicTests, FitnessManagerIterator) {
 }
 
 TEST(BasicTests, FitnessManager) {
-  FitnessManager fitman{2};
+  auto fit = [](const IndividualRep *a, const IndividualRep *b) {
+    return (float)88;
+  };
+  CoevFitnessManager<DefaultFitnessEv<fit>> fitman{2, 1};
 
   Context ctx;
 
@@ -69,9 +72,6 @@ TEST(BasicTests, FitnessManager) {
 
   test.emplace_back(std::make_unique<IntIndividualRep>(48), 0);
   popTwo.replacePopulation(std::move(test));
-
-  fitman.changeFitnessFunction(
-      [](const IndividualRep *a, const IndividualRep *b) { return (float)88; });
 
   // Test iterator
   auto seqOne = fitman.readySignal(&popOne);
@@ -111,12 +111,13 @@ TEST(BasicTests, GeneratePopState) {
 
 TEST(BasicTests, EvalFitnessPopState_OnePop) {
   Context ctx;
+  auto fit = [](const IndividualRep *, const IndividualRep *) -> float {
+    return 50;
+  };
   ctx.popSize = 3;
   ctx.individualMaker = &makeIntIndividual;
-  ctx.fitnessManager = std::make_unique<FitnessManager>(1);
-  ctx.fitnessManager->changeFitnessFunction([](const IndividualRep*, const IndividualRep*)->float{
-    return 50;
-  });
+  ctx.fitnessManager =
+      std::make_unique<CoevFitnessManager<DefaultFitnessEv<fit>>>(1, 1);
   Population newPop(std::make_unique<InitialPopState>(ctx));
 
   newPop.step();
@@ -140,12 +141,13 @@ TEST(BasicTests, EvalFitnessPopState_OnePop) {
 
 TEST(BasicTests, VariationPopState_OnePop) {
   Context ctx;
+  auto fit = [](const IndividualRep *, const IndividualRep *) -> float {
+    return 50;
+  };
   ctx.popSize = 3;
   ctx.individualMaker = &makeIntIndividual;
-  ctx.fitnessManager = std::make_unique<FitnessManager>(1);
-  ctx.fitnessManager->changeFitnessFunction([](const IndividualRep*, const IndividualRep*)->float{
-    return 50;
-  });
+  ctx.fitnessManager =
+      std::make_unique<CoevFitnessManager<DefaultFitnessEv<fit>>>(1, 1);
   Population newPop(std::make_unique<InitialPopState>(ctx));
 
   newPop.step();
@@ -172,14 +174,16 @@ TEST(BasicTests, VariationPopState_OnePop) {
 }
 
 TEST(BasicTests, VariationPopState_TwoPop) {
+  const float expFitness = 50;
+  auto fit = [](const IndividualRep *, const IndividualRep *) -> float {
+    return 50;
+  };
   Context ctx;
   ctx.popSize = 3;
   ctx.individualMaker = &makeIntIndividual;
-  ctx.fitnessManager = std::make_unique<FitnessManager>(2);
-  float expFitness = 50;
-  ctx.fitnessManager->changeFitnessFunction([& expFitness](const IndividualRep*, const IndividualRep*)->float{
-    return expFitness;
-  });
+  ctx.fitnessManager =
+      std::make_unique<CoevFitnessManager<DefaultFitnessEv<fit>>>(2, 1);
+
   Population newPop(std::make_unique<InitialPopState>(ctx));
   Population popTwo(std::make_unique<InitialPopState>(ctx));
 

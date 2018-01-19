@@ -20,7 +20,15 @@ struct Context {
 
   std::unique_ptr<FitnessManager> fitnessManager;
   IndividualMaker individualMaker;
+
+  /**
+   * The crossover function is responsible for crossover probability
+   */
   CrossoverFunc crossoverFunc;
+
+  /**
+   * The mutation function is responsible for the mutation probability
+   */
   MutationFunc mutationFunc;
   PopSizeType popSize;
   size_t tournSize;

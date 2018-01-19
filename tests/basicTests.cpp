@@ -223,6 +223,9 @@ TEST(BasicTests, VariationPopState_TwoPop) {
   newPop.step();
   popTwo.step();
 
+  EXPECT_EQ(newPop.getState()->name(), SurvivalState::Name);
+  EXPECT_EQ(popTwo.getState()->name(), SurvivalState::Name);
+
   EXPECT_EQ(newPop.size(), newPop.newInds.size());
   EXPECT_EQ(popTwo.size(), popTwo.newInds.size());
 }

@@ -15,11 +15,13 @@ Individual makeRandomIntIndivdual() {
   return {std::make_unique<IntIndividualRep>(dis(gen)), 0};
 }
 
-Individual crossoverIntIndividuals(Individual &a, Individual &b) {
-  return {std::make_unique<IntIndividualRep>(
+std::vector<Individual> crossoverIntIndividuals(Individual &a, Individual &b) {
+  std::vector<Individual> ret{};
+  ret.emplace_back(std::make_unique<IntIndividualRep>(
           dynamic_cast<IntIndividualRep*>(a.representation.get())->getValue() +
           dynamic_cast<IntIndividualRep*>(b.representation.get())->getValue()),
-      0};
+      0);
+  return ret;
 }
 
 Individual mutateIntIndividual(Individual &a) {

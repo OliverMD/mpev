@@ -34,6 +34,6 @@ struct Individual {
  */
 Individual makeRandomIntIndivdual();
 
-Individual crossoverIntIndividuals(Individual& a, Individual& b);
+std::vector<Individual> crossoverIntIndividuals(Individual& a, Individual& b);
 
 Individual mutateIntIndividual(Individual& a);

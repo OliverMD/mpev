@@ -3,13 +3,12 @@
 //
 #include "gtgTest.h"
 #include "include/Fitness.h"
-#include "include/Population.h"
 #include <include/PopulationStates.h>
 
 TEST(BasicTests, Sanity) { EXPECT_EQ(0, 0); }
 
 TEST(BasicTests, Population) {
-  Context ctx;
+  Context ctx = makeDefaultContext();
   Population newPop(std::make_unique<InitialPopState>(ctx));
   EXPECT_EQ("InitialPopState", newPop.getState()->name());
 
@@ -27,7 +26,7 @@ TEST(BasicTests, FitnessManagerIterator) {
     return (float)88;
   };
   CoevFitnessManager<DefaultFitnessEv<fit>> fitman{3, 1};
-  Context ctx;
+  Context ctx = makeDefaultContext();
 
   Population popOne{std::make_unique<InitialPopState>(ctx)};
   Population popTwo{std::make_unique<InitialPopState>(ctx)};
@@ -58,7 +57,7 @@ TEST(BasicTests, FitnessManager) {
   };
   CoevFitnessManager<DefaultFitnessEv<fit>> fitman{2, 1};
 
-  Context ctx;
+  Context ctx = makeDefaultContext();
 
   Population popOne{std::make_unique<InitialPopState>(ctx)};
   Population popTwo{std::make_unique<InitialPopState>(ctx)};
@@ -85,12 +84,11 @@ TEST(BasicTests, FitnessManager) {
 }
 
 Individual makeIntIndividual() {
-  static int val = 0;
-  return {std::make_unique<IntIndividualRep>(++val), 0};
+  return {std::make_unique<IntIndividualRep>(5), 0};
 }
 
 TEST(BasicTests, GeneratePopState) {
-  Context ctx;
+  Context ctx = makeDefaultContext();
   ctx.popSize = 3;
   ctx.individualMaker = &makeIntIndividual;
   Population newPop(std::make_unique<InitialPopState>(ctx));
@@ -100,17 +98,16 @@ TEST(BasicTests, GeneratePopState) {
 
   EXPECT_EQ(newPop.getState()->name(), EvaluateFitnessState::Name);
 
-  int testVal = 0;
   for (const auto &ind : newPop) {
     EXPECT_EQ(ind.representation->name(), "int");
     EXPECT_EQ(
         static_cast<IntIndividualRep *>(ind.representation.get())->getValue(),
-        ++testVal);
+        5);
   }
 }
 
 TEST(BasicTests, EvalFitnessPopState_OnePop) {
-  Context ctx;
+  Context ctx = makeDefaultContext();
   auto fit = [](const IndividualRep *, const IndividualRep *) -> float {
     return 50;
   };
@@ -129,18 +126,17 @@ TEST(BasicTests, EvalFitnessPopState_OnePop) {
 
   EXPECT_EQ(newPop.getState()->name(), VariationState::Name);
 
-  int testVal = 0;
   for (const auto &ind : newPop) {
     EXPECT_EQ(ind.representation->name(), "int");
     EXPECT_EQ(
         static_cast<IntIndividualRep *>(ind.representation.get())->getValue(),
-        ++testVal);
+        5);
     EXPECT_EQ(ind.fitness, 50);
   }
 }
 
 TEST(BasicTests, VariationPopState_OnePop) {
-  Context ctx;
+  Context ctx = makeDefaultContext();
   auto fit = [](const IndividualRep *, const IndividualRep *) -> float {
     return 50;
   };
@@ -159,12 +155,11 @@ TEST(BasicTests, VariationPopState_OnePop) {
 
   EXPECT_EQ(newPop.getState()->name(), VariationState::Name);
 
-  int testVal = 0;
   for (const auto &ind : newPop) {
     EXPECT_EQ(ind.representation->name(), "int");
     EXPECT_EQ(
         static_cast<IntIndividualRep *>(ind.representation.get())->getValue(),
-        ++testVal);
+        5);
     EXPECT_EQ(ind.fitness, 50);
   }
 
@@ -178,11 +173,23 @@ TEST(BasicTests, VariationPopState_TwoPop) {
   auto fit = [](const IndividualRep *, const IndividualRep *) -> float {
     return 50;
   };
-  Context ctx;
+  Context ctx = makeDefaultContext();
   ctx.popSize = 3;
   ctx.individualMaker = &makeIntIndividual;
   ctx.fitnessManager =
       std::make_unique<CoevFitnessManager<DefaultFitnessEv<fit>>>(2, 1);
+  ctx.crossoverFunc = [](Individual &a, Individual &b) {
+    std::vector<Individual> ret{};
+    ret.emplace_back(std::make_unique<IntIndividualRep>(99), 0);
+    return ret;
+  };
+
+  ctx.mutationFunc = [](Individual &a) -> Individual {
+    return {std::make_unique<IntIndividualRep>(
+                1 + dynamic_cast<IntIndividualRep *>(a.representation.get())
+                        ->getValue()),
+            0};
+  };
 
   Population newPop(std::make_unique<InitialPopState>(ctx));
   Population popTwo(std::make_unique<InitialPopState>(ctx));
@@ -195,6 +202,9 @@ TEST(BasicTests, VariationPopState_TwoPop) {
   EXPECT_EQ(newPop.getState()->name(), EvaluateFitnessState::Name);
   EXPECT_EQ(popTwo.getState()->name(), EvaluateFitnessState::Name);
 
+  EXPECT_GT(newPop.size(), 0);
+  EXPECT_GT(popTwo.size(), 0);
+
   newPop.step();
   popTwo.step();
 
@@ -202,21 +212,22 @@ TEST(BasicTests, VariationPopState_TwoPop) {
   newPop.step(); // Need to step to pickup change
   EXPECT_EQ(newPop.getState()->name(), VariationState::Name);
 
-  int testVal = 0;
+  EXPECT_GT(newPop.size(), 0);
+  EXPECT_GT(popTwo.size(), 0);
+
   for (const auto &ind : newPop) {
     EXPECT_EQ(ind.representation->name(), "int");
     EXPECT_EQ(
         static_cast<IntIndividualRep *>(ind.representation.get())->getValue(),
-        ++testVal);
+        5);
     EXPECT_EQ(ind.fitness, 50);
   }
 
-  testVal = 0;
   for (const auto &ind : popTwo) {
     EXPECT_EQ(ind.representation->name(), "int");
     EXPECT_EQ(
         static_cast<IntIndividualRep *>(ind.representation.get())->getValue(),
-        ++testVal);
+        5);
     EXPECT_EQ(ind.fitness, 50);
   }
 
@@ -225,6 +236,24 @@ TEST(BasicTests, VariationPopState_TwoPop) {
 
   EXPECT_EQ(newPop.getState()->name(), SurvivalState::Name);
   EXPECT_EQ(popTwo.getState()->name(), SurvivalState::Name);
+
+  EXPECT_GT(newPop.size(), 0);
+  EXPECT_GT(popTwo.size(), 0);
+  for (auto &ind : newPop.newInds) {
+    EXPECT_EQ(ind.representation->name(), "int");
+    EXPECT_EQ(
+        static_cast<IntIndividualRep *>(ind.representation.get())->getValue(),
+        100);
+    EXPECT_EQ(ind.fitness, 0);
+  }
+
+  for (const auto &ind : popTwo.newInds) {
+    EXPECT_EQ(ind.representation->name(), "int");
+    EXPECT_EQ(
+        static_cast<IntIndividualRep *>(ind.representation.get())->getValue(),
+        100);
+    EXPECT_EQ(ind.fitness, 0);
+  }
 
   EXPECT_EQ(newPop.size(), newPop.newInds.size());
   EXPECT_EQ(popTwo.size(), popTwo.newInds.size());

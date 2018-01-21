@@ -2,9 +2,9 @@
 // Created by Oliver Downard on 19/12/2017.
 //
 
-#include <random>
 #include "include/PopulationStates.h"
 #include "include/Fitness.h"
+#include <random>
 
 const std::string EvaluateFitnessState::Name = "EvaluateFitnessState";
 const std::string GeneratePopState::Name = "GeneratePopState";
@@ -23,10 +23,12 @@ std::unique_ptr<PopulationState> GeneratePopState::execute(Population &pop) {
     inds.push_back(ctx.individualMaker());
   }
 
+  pop.replacePopulation(std::move(inds));
   return std::make_unique<EvaluateFitnessState>(ctx);
 }
 
-std::unique_ptr<PopulationState> EvaluateFitnessState::execute(Population &pop) {
+std::unique_ptr<PopulationState>
+EvaluateFitnessState::execute(Population &pop) {
   // Slightly complex under coevolution as we need other populations to
 
   // Tell the manager this population wants to be processed, it may run straight
@@ -46,17 +48,17 @@ std::unique_ptr<PopulationState> EvaluateFitnessState::execute(Population &pop) 
   return nullptr;
 }
 
-Individual& VariationState::tournamentSelectInd(Population& p) {
+Individual &VariationState::tournamentSelectInd(Population &p) {
   static std::random_device
       rd; // Will be used to obtain a seed for the random number engine
   static std::mt19937 gen(
       rd()); // Standard mersenne_twister_engine seeded with rd()
-  std::uniform_int_distribution<size_t> dis(0, p.size());
+  std::uniform_int_distribution<size_t> dis(0, p.size() - 1);
 
-  Individual* ind = &p.currentInds[dis(gen)];
+  Individual *ind = &(p.currentInds.at(dis(gen)));
 
   for (size_t i = 1; i < ctx.tournSize; ++i) {
-    Individual* test = &p.currentInds[dis(gen)];
+    Individual *test = &p.currentInds[dis(gen)];
     if (test->fitness > ind->fitness) {
       ind = test;
     }
@@ -68,8 +70,9 @@ Individual& VariationState::tournamentSelectInd(Population& p) {
 std::unique_ptr<PopulationState> VariationState::execute(Population &pop) {
   pop.newInds.reserve(pop.size());
   for (size_t i = 0; i < pop.size(); ++i) {
-    auto inds = ctx.crossoverFunc(tournamentSelectInd(pop), tournamentSelectInd(pop));
-    for (auto& ind : inds) {
+    auto inds =
+        ctx.crossoverFunc(tournamentSelectInd(pop), tournamentSelectInd(pop));
+    for (auto &ind : inds) {
       pop.newInds.emplace_back(ctx.mutationFunc(ind));
     }
   }

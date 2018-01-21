@@ -8,6 +8,7 @@
 #include <random>
 #include <unordered_map>
 
+#include "FitnessManager.h"
 #include "Individual.h"
 #include "Population.h"
 
@@ -28,15 +29,6 @@ public:
 
 private:
   std::unordered_map<const IndividualRep *, float> fitnessMap;
-};
-
-/**
- * Interface for a FitnessManager
- */
-class FitnessManager {
-public:
-  virtual uint32_t readySignal(Population *const pop) = 0;
-  virtual std::optional<uint32_t> lastEvaluation() = 0;
 };
 
 /**

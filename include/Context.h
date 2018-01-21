@@ -4,10 +4,10 @@
 #pragma once
 
 #include "Individual.h"
+#include "FitnessManager.h"
 
 #include <functional>
 
-class FitnessManager;
 /**
  * Context class that stores various helper functions and utilities and
  * parameters used during evolution.
@@ -17,6 +17,12 @@ struct Context {
   using CrossoverFunc = std::function<decltype(crossoverIntIndividuals)>;
   using MutationFunc = std::function<decltype(mutateIntIndividual)>;
   using PopSizeType = uint32_t;
+
+  Context() {}
+  Context(IndividualMaker maker, CrossoverFunc cross, MutationFunc mut,
+          size_t tSize)
+      : individualMaker{maker}, crossoverFunc{cross},
+        mutationFunc{mut}, tournSize{tSize} {}
 
   std::unique_ptr<FitnessManager> fitnessManager;
   IndividualMaker individualMaker;
@@ -33,3 +39,5 @@ struct Context {
   PopSizeType popSize;
   size_t tournSize;
 };
+
+Context makeDefaultContext();

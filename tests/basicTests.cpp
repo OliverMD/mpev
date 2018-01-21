@@ -258,3 +258,119 @@ TEST(BasicTests, VariationPopState_TwoPop) {
   EXPECT_EQ(newPop.size(), newPop.newInds.size());
   EXPECT_EQ(popTwo.size(), popTwo.newInds.size());
 }
+
+TEST(BasicTests, SurvivalPopState_TwoPop) {
+  const float expFitness = 50;
+  auto fit = [](const IndividualRep *, const IndividualRep *) -> float {
+    return 50;
+  };
+  Context ctx = makeDefaultContext();
+  ctx.popSize = 3;
+  ctx.individualMaker = &makeIntIndividual;
+  ctx.fitnessManager =
+      std::make_unique<CoevFitnessManager<DefaultFitnessEv<fit>>>(2, 1);
+  ctx.crossoverFunc = [](Individual &a, Individual &b) {
+    std::vector<Individual> ret{};
+    ret.emplace_back(std::make_unique<IntIndividualRep>(99), 0);
+    return ret;
+  };
+
+  ctx.mutationFunc = [](Individual &a) -> Individual {
+    return {std::make_unique<IntIndividualRep>(
+        1 + dynamic_cast<IntIndividualRep *>(a.representation.get())
+            ->getValue()),
+            0};
+  };
+
+  Population newPop(std::make_unique<InitialPopState>(ctx));
+  Population popTwo(std::make_unique<InitialPopState>(ctx));
+
+  newPop.step();
+  popTwo.step();
+  newPop.step();
+  popTwo.step();
+
+  EXPECT_EQ(newPop.getState()->name(), EvaluateFitnessState::Name);
+  EXPECT_EQ(popTwo.getState()->name(), EvaluateFitnessState::Name);
+
+  EXPECT_GT(newPop.size(), 0);
+  EXPECT_GT(popTwo.size(), 0);
+
+  newPop.step();
+  popTwo.step();
+
+  EXPECT_EQ(popTwo.getState()->name(), VariationState::Name);
+  newPop.step(); // Need to step to pickup change
+  EXPECT_EQ(newPop.getState()->name(), VariationState::Name);
+
+  EXPECT_GT(newPop.size(), 0);
+  EXPECT_GT(popTwo.size(), 0);
+
+  for (const auto &ind : newPop) {
+    EXPECT_EQ(ind.representation->name(), "int");
+    EXPECT_EQ(
+        static_cast<IntIndividualRep *>(ind.representation.get())->getValue(),
+        5);
+    EXPECT_EQ(ind.fitness, 50);
+  }
+
+  for (const auto &ind : popTwo) {
+    EXPECT_EQ(ind.representation->name(), "int");
+    EXPECT_EQ(
+        static_cast<IntIndividualRep *>(ind.representation.get())->getValue(),
+        5);
+    EXPECT_EQ(ind.fitness, 50);
+  }
+
+  newPop.step();
+  popTwo.step();
+
+  EXPECT_EQ(newPop.getState()->name(), SurvivalState::Name);
+  EXPECT_EQ(popTwo.getState()->name(), SurvivalState::Name);
+
+  EXPECT_GT(newPop.size(), 0);
+  EXPECT_GT(popTwo.size(), 0);
+  for (auto &ind : newPop.newInds) {
+    EXPECT_EQ(ind.representation->name(), "int");
+    EXPECT_EQ(
+        static_cast<IntIndividualRep *>(ind.representation.get())->getValue(),
+        100);
+    EXPECT_EQ(ind.fitness, 0);
+  }
+
+  for (const auto &ind : popTwo.newInds) {
+    EXPECT_EQ(ind.representation->name(), "int");
+    EXPECT_EQ(
+        static_cast<IntIndividualRep *>(ind.representation.get())->getValue(),
+        100);
+    EXPECT_EQ(ind.fitness, 0);
+  }
+
+  EXPECT_EQ(newPop.size(), newPop.newInds.size());
+  EXPECT_EQ(popTwo.size(), popTwo.newInds.size());
+
+  newPop.step();
+  popTwo.step();
+
+  EXPECT_EQ(newPop.getState()->name(), EvaluateFitnessState::Name);
+  EXPECT_EQ(popTwo.getState()->name(), EvaluateFitnessState::Name);
+
+  EXPECT_EQ(newPop.newInds.size(), 0);
+  EXPECT_EQ(popTwo.newInds.size(), 0);
+
+  for (auto &ind : newPop) {
+    EXPECT_EQ(ind.representation->name(), "int");
+    EXPECT_EQ(
+        static_cast<IntIndividualRep *>(ind.representation.get())->getValue(),
+        100);
+    EXPECT_EQ(ind.fitness, 0);
+  }
+
+  for (const auto &ind : popTwo) {
+    EXPECT_EQ(ind.representation->name(), "int");
+    EXPECT_EQ(
+        static_cast<IntIndividualRep *>(ind.representation.get())->getValue(),
+        100);
+    EXPECT_EQ(ind.fitness, 0);
+  }
+}

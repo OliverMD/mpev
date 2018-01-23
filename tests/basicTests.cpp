@@ -374,3 +374,30 @@ TEST(BasicTests, SurvivalPopState_TwoPop) {
     EXPECT_EQ(ind.fitness, 0);
   }
 }
+
+TEST(StatsTests, PopulationStats) {
+  Context ctx = makeDefaultContext();
+  Population pop(std::make_unique<InitialPopState>(ctx));
+
+  pop.currentInds.emplace_back(nullptr, 0);
+  pop.currentInds.emplace_back(nullptr, 1);
+  pop.currentInds.emplace_back(nullptr, 2);
+  pop.currentInds.emplace_back(nullptr, 3);
+  pop.currentInds.emplace_back(nullptr, 4);
+  pop.currentInds.emplace_back(nullptr, 5);
+
+  PopulationStats stats = pop.getStats();
+
+  EXPECT_EQ(stats.meanFitness, 2.5);
+  EXPECT_EQ(stats.minFitness, 0);
+  EXPECT_EQ(stats.maxFitness, 5);
+  EXPECT_EQ(stats.medianFitness, 2);
+  EXPECT_EQ(stats.upperQuartileFitness, 4);
+  EXPECT_EQ(stats.lowerQuartileFitness, 1);
+
+  std::stringstream ss;
+
+  ss << stats;
+
+  EXPECT_EQ(ss.str(), "5,0,2.5,2,4,1");
+}

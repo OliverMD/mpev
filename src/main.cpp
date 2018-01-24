@@ -153,20 +153,25 @@ int main() {
 
   std::array<size_t, 2> gens{0, 0};
 
-  while (gens[0] < 50 || gens[1] < 50) {
-    if (gens[0] < 50) {
+  constexpr size_t numGens = 1000;
+
+  while (gens[0] < numGens || gens[1] < numGens) {
+    if (gens[0] < numGens) {
       pops[0].step();
-      if (pops[0].getState()->name() == VariationState::Name)
+      if (pops[0].getState()->name() == VariationState::Name) {
+        std::cout << "0: gen: " << gens[0] << " - " << pops[0].getStats()
+                  << std::endl;
         gens[0] += 1;
+      }
     }
-    if (gens[1] < 50) {
+    if (gens[1] < numGens) {
       pops[1].step();
-      if (pops[1].getState()->name() == VariationState::Name)
+      if (pops[1].getState()->name() == VariationState::Name) {
+        std::cout << "1: gen: " << gens[1] << " - " << pops[1].getStats()
+                  << std::endl;
         gens[1] += 1;
+      }
     }
   }
-
-  std::cout << pops[0].currentInds[0].fitness << std::endl;
-
   return 0;
 }

@@ -1,0 +1,2 @@
+display
+plotly>=2.2

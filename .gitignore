@@ -38,3 +38,5 @@ cmake-build*/
 
 *.swp
 .DS_Store
+
+*.html

@@ -124,7 +124,7 @@ TEST(BasicTests, EvalFitnessPopState_OnePop) {
 
   newPop.step();
 
-  EXPECT_EQ(newPop.getState()->name(), VariationState::Name);
+  EXPECT_EQ(newPop.getState()->name(), ReporterState::Name);
 
   for (const auto &ind : newPop) {
     EXPECT_EQ(ind.representation->name(), "int");
@@ -153,6 +153,8 @@ TEST(BasicTests, VariationPopState_OnePop) {
 
   newPop.step();
 
+  EXPECT_EQ(newPop.getState()->name(), ReporterState::Name);
+  newPop.step();
   EXPECT_EQ(newPop.getState()->name(), VariationState::Name);
 
   for (const auto &ind : newPop) {
@@ -208,9 +210,9 @@ TEST(BasicTests, VariationPopState_TwoPop) {
   newPop.step();
   popTwo.step();
 
-  EXPECT_EQ(popTwo.getState()->name(), VariationState::Name);
+  EXPECT_EQ(popTwo.getState()->name(), ReporterState::Name);
   newPop.step(); // Need to step to pickup change
-  EXPECT_EQ(newPop.getState()->name(), VariationState::Name);
+  EXPECT_EQ(newPop.getState()->name(), ReporterState::Name);
 
   EXPECT_GT(newPop.size(), 0);
   EXPECT_GT(popTwo.size(), 0);
@@ -230,6 +232,12 @@ TEST(BasicTests, VariationPopState_TwoPop) {
         5);
     EXPECT_EQ(ind.fitness, 50);
   }
+
+  newPop.step();
+  popTwo.step();
+
+  EXPECT_EQ(popTwo.getState()->name(), VariationState::Name);
+  EXPECT_EQ(newPop.getState()->name(), VariationState::Name);
 
   newPop.step();
   popTwo.step();
@@ -299,9 +307,9 @@ TEST(BasicTests, SurvivalPopState_TwoPop) {
   newPop.step();
   popTwo.step();
 
-  EXPECT_EQ(popTwo.getState()->name(), VariationState::Name);
+  EXPECT_EQ(popTwo.getState()->name(), ReporterState::Name);
   newPop.step(); // Need to step to pickup change
-  EXPECT_EQ(newPop.getState()->name(), VariationState::Name);
+  EXPECT_EQ(newPop.getState()->name(), ReporterState::Name);
 
   EXPECT_GT(newPop.size(), 0);
   EXPECT_GT(popTwo.size(), 0);
@@ -321,6 +329,12 @@ TEST(BasicTests, SurvivalPopState_TwoPop) {
         5);
     EXPECT_EQ(ind.fitness, 50);
   }
+
+  newPop.step();
+  popTwo.step();
+
+  EXPECT_EQ(popTwo.getState()->name(), VariationState::Name);
+  EXPECT_EQ(newPop.getState()->name(), VariationState::Name);
 
   newPop.step();
   popTwo.step();

@@ -63,9 +63,22 @@ public:
     currentInds.swap(newPop);
   }
 
-  PopulationStats getStats() const {
+  static PopulationStats calculateFitnessStats(std::vector<float> fits) {
     PopulationStats ret{};
+    size_t size = fits.size();
+    std::sort(std::begin(fits), std::end(fits));
+    ret.medianFitness = fits[(size - 1) / 2];
+    ret.lowerQuartileFitness = fits[(size - 1) / 4];
+    ret.upperQuartileFitness = fits[size - 1 - ((size - 1)/ 4)];
+    ret.maxFitness = fits[size - 1];
+    ret.minFitness = fits[0];
+    ret.meanFitness =
+        std::accumulate(std::begin(fits), std::end(fits), (float)0.0) / (float)size;
 
+    return ret;
+  }
+
+  PopulationStats getStats() const {
     std::vector<float> fits;
     fits.reserve(size());
 
@@ -73,16 +86,7 @@ public:
       fits.emplace_back(ind.fitness);
     }
 
-    std::sort(std::begin(fits), std::end(fits));
-    ret.medianFitness = fits[(size() - 1) / 2];
-    ret.lowerQuartileFitness = fits[(size() - 1) / 4];
-    ret.upperQuartileFitness = fits[size() - 1 - ((size() - 1)/ 4)];
-    ret.maxFitness = fits[size() - 1];
-    ret.minFitness = fits[0];
-    ret.meanFitness =
-        std::accumulate(std::begin(fits), std::end(fits), (float)0.0) / (float)size();
-
-    return ret;
+    return calculateFitnessStats(fits);
   }
 
   auto cbegin() const { return std::cbegin(currentInds); };

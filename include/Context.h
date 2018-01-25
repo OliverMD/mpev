@@ -5,6 +5,7 @@
 
 #include "Individual.h"
 #include "FitnessManager.h"
+#include "Stats.h"
 
 #include <functional>
 
@@ -16,13 +17,15 @@ struct Context {
   using IndividualMaker = std::function<decltype(makeRandomIntIndivdual)>;
   using CrossoverFunc = std::function<decltype(crossoverIntIndividuals)>;
   using MutationFunc = std::function<decltype(mutateIntIndividual)>;
+  using ReporterCallback = std::function<void(PopulationStats, uint32_t)>;
+  using ObjectiveFunc = std::function<float(const IndividualRep*)>;
   using PopSizeType = uint32_t;
 
   Context() {}
   Context(IndividualMaker maker, CrossoverFunc cross, MutationFunc mut,
           size_t tSize)
       : individualMaker{maker}, crossoverFunc{cross},
-        mutationFunc{mut}, tournSize{tSize} {}
+        mutationFunc{mut}, tournSize{tSize}, reporterCallback{nullptr} {}
 
   std::unique_ptr<FitnessManager> fitnessManager;
   IndividualMaker individualMaker;
@@ -38,6 +41,8 @@ struct Context {
   MutationFunc mutationFunc;
   PopSizeType popSize;
   size_t tournSize;
+  ReporterCallback reporterCallback;
+  ObjectiveFunc objectiveFunc;
 };
 
 Context makeDefaultContext();

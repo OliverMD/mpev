@@ -9,6 +9,7 @@
 const std::string EvaluateFitnessState::Name = "EvaluateFitnessState";
 const std::string GeneratePopState::Name = "GeneratePopState";
 const std::string VariationState::Name = "VariationState";
+const std::string ReporterState::Name = "ReporterState";
 const std::string SurvivalState::Name = "SurvivalState";
 
 std::unique_ptr<PopulationState> InitialPopState::execute(Population &pop) {
@@ -42,10 +43,23 @@ EvaluateFitnessState::execute(Population &pop) {
 
   auto last = ctx.fitnessManager->lastEvaluation();
   if (last.has_value() && last.value() >= registeredSeqno.value()) {
-    return std::make_unique<VariationState>(ctx);
+    return std::make_unique<ReporterState>(ctx);
   }
 
   return nullptr;
+}
+
+std::unique_ptr<PopulationState> ReporterState::execute(Population &pop) {
+  if (ctx.reporterCallback == nullptr) {
+    return std::make_unique<VariationState>(ctx);
+  }
+  std::vector<float> fits;
+  fits.reserve(pop.size());
+  for (const auto& ind : pop.currentInds) {
+    fits.emplace_back(ctx.objectiveFunc(ind.representation.get()));
+  }
+  ctx.reporterCallback(Population::calculateFitnessStats(fits), pop.getId());
+  return std::make_unique<VariationState>(ctx);
 }
 
 Individual &VariationState::tournamentSelectInd(Population &p) {

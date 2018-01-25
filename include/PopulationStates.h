@@ -27,6 +27,16 @@ private:
   std::optional<uint32_t> registeredSeqno;
 };
 
+class ReporterState : public PopulationState {
+public:
+  static const std::string Name;
+  ReporterState(Context& ctx) : ctx{ctx} {}
+  std::unique_ptr<PopulationState> execute(Population& pop) override;
+  std::string name() const override { return Name; }
+private:
+  Context& ctx;
+};
+
 class VariationState : public PopulationState {
 public:
   static const std::string Name;

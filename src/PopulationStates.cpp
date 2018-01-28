@@ -82,11 +82,40 @@ Individual &VariationState::tournamentSelectInd(Population &p) {
   return *ind;
 }
 
+Individual& VariationState::rouletteWheelSelect(Population &p) {
+  static std::random_device
+      rd; // Will be used to obtain a seed for the random number engine
+  static std::mt19937 gen(
+      rd()); // Standard mersenne_twister_engine seeded with rd()
+  std::uniform_real_distribution<double> dis(0, 1);
+  if (inds.size() == 0) {
+    for (Individual &i : p.currentInds) {
+      inds.insert(std::upper_bound(std::begin(inds), std::end(inds), &i,
+                                   [](const Individual *a,
+                                      const Individual *b) -> bool {
+                                     return a->fitness < b->fitness;
+                                   }), &i);
+      fitSum += i.fitness;
+    }
+  }
+
+  double target = dis(gen) * fitSum;
+  double total{0};
+
+  for (Individual* ind : inds) {
+    total += ind->fitness;
+    if (target <= total) {
+      return *ind;
+    }
+  }
+  return **std::rbegin(inds);
+}
+
 std::unique_ptr<PopulationState> VariationState::execute(Population &pop) {
   pop.newInds.reserve(pop.size());
   for (size_t i = 0; i < pop.size(); ++i) {
     auto inds =
-        ctx.crossoverFunc(tournamentSelectInd(pop), tournamentSelectInd(pop));
+        ctx.crossoverFunc(rouletteWheelSelect(pop), rouletteWheelSelect(pop));
     for (auto &ind : inds) {
       pop.newInds.emplace_back(ctx.mutationFunc(ind));
     }

@@ -49,7 +49,7 @@ private:
 class Population {
 public:
   Population(std::unique_ptr<PopulationState> startState)
-      : id{CURRENTID++}, state{std::move(startState)} {}
+      : id{CURRENTID++}, state{std::move(startState)}, age{0} {}
 
   void step() {
     auto newState = state->execute(*this);
@@ -103,6 +103,7 @@ public:
 
   std::vector<Individual> newInds;
   std::vector<Individual> currentInds;
+  size_t age;
 
 private:
   static std::atomic<uint32_t> CURRENTID;

@@ -58,7 +58,8 @@ std::unique_ptr<PopulationState> ReporterState::execute(Population &pop) {
   for (const auto& ind : pop.currentInds) {
     fits.emplace_back(ctx.objectiveFunc(ind.representation.get()));
   }
-  ctx.reporterCallback(Population::calculateFitnessStats(fits), pop.getId());
+  ctx.reporterCallback(Population::calculateFitnessStats(fits), pop.getId(), pop.age);
+  ++pop.age;
   return std::make_unique<VariationState>(ctx);
 }
 

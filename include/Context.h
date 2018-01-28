@@ -17,7 +17,7 @@ struct Context {
   using IndividualMaker = std::function<decltype(makeRandomIntIndivdual)>;
   using CrossoverFunc = std::function<decltype(crossoverIntIndividuals)>;
   using MutationFunc = std::function<decltype(mutateIntIndividual)>;
-  using ReporterCallback = std::function<void(PopulationStats, uint32_t)>;
+  using ReporterCallback = std::function<void(PopulationStats, uint32_t, size_t)>;
   using ObjectiveFunc = std::function<float(const IndividualRep*)>;
   using PopSizeType = uint32_t;
 

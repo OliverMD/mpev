@@ -1,16 +1,15 @@
 #include <array>
 #include <include/Context.h>
 #include <include/Fitness.h>
-#include <include/Individual.h>
 #include <include/PopulationStates.h>
 #include <iostream>
-#include <random>
+#include <fstream>
 
 namespace ExpOne {
 
 constexpr size_t NumBits = 100;
-constexpr float CrossoverProb = 0.1;
-constexpr float MutationProb = 0.01;
+constexpr float CrossoverProb = 0;
+constexpr float MutationProb = 0.05;
 
 template <size_t size> class OnesIndRep : public IndividualRep {
 public:
@@ -125,8 +124,34 @@ Individual mutateOnesInd(Individual &a) {
 }
 } // namespace ExpOne
 
+void evolve(size_t numGens, Context ctx, size_t numPops) {
+  std::vector<size_t> gens;
+  std::vector<Population> pops;
+
+  gens.resize(numPops);
+  std::fill(std::begin(gens), std::end(gens), 0);
+
+  for (size_t i = 0; i < numPops; ++i) {
+    pops.emplace_back(std::make_unique<InitialPopState>(ctx));
+  }
+
+  while (std::find_if(std::begin(gens), std::end(gens), [numGens](size_t x){
+    return x < numGens;
+  }) != std::end(gens)) {
+    for (size_t i = 0; i < numPops; ++i) {
+      if (gens.at(i) < numGens) {
+        pops.at(i).step();
+        if (pops.at(i).getState()->name() == VariationState::Name) {
+          ++gens.at(i);
+          //std::cout << pops.at(i).getStats() << std::endl;
+        }
+      }
+    }
+  }
+}
+
 // Experiment 1
-int main() {
+int main(int argc, char* argv[]) {
   // 1. Generate populations
   // 2. For n generations
   //    i. calculate fitness of each individual in each population
@@ -136,42 +161,36 @@ int main() {
   //    iii. generate new individuals
   //    iv. selection for replacement/survival
 
+  std::string resFile = "results.csv";
+
+  if (argc == 2) {
+    resFile = argv[1];
+  }
+
   Context ctx = makeDefaultContext();
   ctx.tournSize = 5;
   ctx.mutationFunc = ExpOne::mutateOnesInd;
   ctx.crossoverFunc = ExpOne::crossOnesInds;
   ctx.individualMaker = ExpOne::makeOnesInd;
 
-  ctx.popSize = 100;
+  ctx.objectiveFunc = [](const IndividualRep* rep) {
+    const ExpOne::Rep* a = dynamic_cast<const ExpOne::Rep *>(rep);
+    return a->getNumOnes();
+  };
+
+  ctx.popSize = 25;
 
   ctx.fitnessManager = std::make_unique<
       CoevFitnessManager<DefaultFitnessEv<ExpOne::fitnessFunc>>>(2, 10);
 
-  std::array<Population, 2> pops{
-      Population{std::make_unique<InitialPopState>(ctx)},
-      Population{std::make_unique<InitialPopState>(ctx)}};
+  std::ofstream oFile(resFile, std::ios::out);
+  oFile << "gen,pop,max,min,mean,median,upper,lower" << std::endl;
 
-  std::array<size_t, 2> gens{0, 0};
+  ctx.reporterCallback = [&oFile](PopulationStats stats, uint32_t popId, size_t gen) {
+    oFile << gen << "," << popId << "," << stats << std::endl;
+  };
 
-  constexpr size_t numGens = 1000;
-
-  while (gens[0] < numGens || gens[1] < numGens) {
-    if (gens[0] < numGens) {
-      pops[0].step();
-      if (pops[0].getState()->name() == VariationState::Name) {
-        std::cout << "0: gen: " << gens[0] << " - " << pops[0].getStats()
-                  << std::endl;
-        gens[0] += 1;
-      }
-    }
-    if (gens[1] < numGens) {
-      pops[1].step();
-      if (pops[1].getState()->name() == VariationState::Name) {
-        std::cout << "1: gen: " << gens[1] << " - " << pops[1].getStats()
-                  << std::endl;
-        gens[1] += 1;
-      }
-    }
-  }
+  evolve(600, std::move(ctx), 2);
+  oFile.close();
   return 0;
 }

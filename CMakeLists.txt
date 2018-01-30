@@ -60,4 +60,5 @@ include_directories(AFTER
 enable_testing()
 
 add_subdirectory(src)
+add_subdirectory(experiments)
 add_subdirectory(tests)

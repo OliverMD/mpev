@@ -45,10 +45,6 @@ public:
   std::string name() const override { return Name; }
 private:
   Context& ctx;
-  Individual& tournamentSelectInd(Population& p);
-  Individual& rouletteWheelSelect(Population& p);
-  std::vector<Individual*> inds;
-  double fitSum;
 };
 
 class SurvivalState : public PopulationState {

@@ -4,6 +4,7 @@
 #include "gtgTest.h"
 #include "include/Fitness.h"
 #include <include/PopulationStates.h>
+#include "include/Selectors.h"
 
 TEST(BasicTests, Sanity) { EXPECT_EQ(0, 0); }
 
@@ -144,6 +145,8 @@ TEST(BasicTests, VariationPopState_OnePop) {
   ctx.individualMaker = &makeIntIndividual;
   ctx.fitnessManager =
       std::make_unique<CoevFitnessManager<DefaultFitnessEv<fit>>>(1, 1);
+  ctx.varySelectorCreator = createTournSelect;
+  ctx.survivalSelectorCreator = createTournSelect;
   Population newPop(std::make_unique<InitialPopState>(ctx));
 
   newPop.step();
@@ -185,6 +188,8 @@ TEST(BasicTests, VariationPopState_TwoPop) {
     ret.emplace_back(std::make_unique<IntIndividualRep>(99), 0);
     return ret;
   };
+  ctx.varySelectorCreator = createTournSelect;
+  ctx.survivalSelectorCreator = createTournSelect;
 
   ctx.mutationFunc = [](Individual &a) -> Individual {
     return {std::make_unique<IntIndividualRep>(
@@ -282,6 +287,8 @@ TEST(BasicTests, SurvivalPopState_TwoPop) {
     ret.emplace_back(std::make_unique<IntIndividualRep>(99), 0);
     return ret;
   };
+  ctx.varySelectorCreator = createTournSelect;
+  ctx.survivalSelectorCreator = createTournSelect;
 
   ctx.mutationFunc = [](Individual &a) -> Individual {
     return {std::make_unique<IntIndividualRep>(

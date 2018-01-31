@@ -5,6 +5,8 @@
 #include <iostream>
 #include <fstream>
 
+#include "include/Selectors.h"
+
 namespace ExpOne {
 
 constexpr size_t NumBits = 100;
@@ -34,6 +36,10 @@ public:
   bool flipBit(size_t i) {
     bits[i] = ~bits[i];
     return bits[i];
+  }
+
+  std::unique_ptr<IndividualRep> copy() {
+    return std::make_unique<OnesIndRep>(bits);
   }
 
   /**
@@ -172,6 +178,9 @@ int main(int argc, char* argv[]) {
   ctx.mutationFunc = ExpOne::mutateOnesInd;
   ctx.crossoverFunc = ExpOne::crossOnesInds;
   ctx.individualMaker = ExpOne::makeOnesInd;
+
+  ctx.varySelectorCreator = createRouletteSelect;
+  ctx.survivalSelectorCreator = createStraightCopy;
 
   ctx.objectiveFunc = [](const IndividualRep* rep) {
     const ExpOne::Rep* a = dynamic_cast<const ExpOne::Rep *>(rep);

@@ -19,6 +19,15 @@ struct Context {
   using MutationFunc = std::function<decltype(mutateIntIndividual)>;
   using ReporterCallback = std::function<void(PopulationStats, uint32_t, size_t)>;
   using ObjectiveFunc = std::function<float(const IndividualRep*)>;
+
+  using Selector = std::function<Individual&(std::vector<Individual>&)>;
+
+  using VariationSelector = Selector;
+  using SurvivalSelector = Selector;
+
+  using VarySelectorCreator = std::function<VariationSelector(Context&)>;
+  using SurvivalSelectorCreator = std::function<SurvivalSelector(Context&)>;
+
   using PopSizeType = uint32_t;
 
   Context() {}
@@ -43,6 +52,9 @@ struct Context {
   size_t tournSize;
   ReporterCallback reporterCallback;
   ObjectiveFunc objectiveFunc;
+
+  VarySelectorCreator varySelectorCreator;
+  SurvivalSelectorCreator survivalSelectorCreator;
 };
 
 Context makeDefaultContext();

@@ -9,6 +9,7 @@
 class IndividualRep {
 public:
   virtual std::string name() = 0;
+  virtual std::unique_ptr<IndividualRep> copy() = 0;
 };
 
 class IntIndividualRep : public IndividualRep {
@@ -16,6 +17,9 @@ public:
   IntIndividualRep(int val) : value{val} {}
   std::string name() { return "int"; }
   int getValue() { return value; }
+  std::unique_ptr<IndividualRep> copy() {
+    return std::make_unique<IntIndividualRep>(value);
+  }
 
 private:
   int value;

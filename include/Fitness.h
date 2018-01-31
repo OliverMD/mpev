@@ -37,7 +37,7 @@ private:
 template <typename FitEv> class CoevFitnessManager : public FitnessManager {
 public:
   // using FitnessFunction = std::function<decltype(identityFitnessFunc)>;
-  using PopStore = std::unordered_map<uint32_t, Population *const>;
+  using PopStore = std::unordered_map<uint32_t, std::vector<Individual> *const>;
 
   /**
    *
@@ -56,8 +56,12 @@ public:
    * used for
    */
   uint32_t readySignal(Population *const pop) override {
-    if (pops.count(pop->getId()) < 1) {
-      pops.insert({pop->getId(), pop});
+    return readySignal(&pop->currentInds, pop->getId());
+  }
+
+  uint32_t readySignal(std::vector<Individual> * const pop, uint32_t popId) override {
+    if (pops.count(popId) < 1) {
+      pops.insert({popId, pop});
     }
 
     // runEvaluation may alter the sequence number, so take a copy here.
@@ -215,7 +219,6 @@ private:
   }
   const uint16_t numPops;
   PopStore pops;
-  // FitnessFunction fitnessFunction;
   uint32_t seqNo;
   size_t numOfOpponents;
   FitEv ev;

@@ -76,6 +76,15 @@ std::unique_ptr<PopulationState> VariationState::execute(Population &pop) {
 }
 
 std::unique_ptr<PopulationState> SurvivalState::execute(Population &pop) {
+  if (!registeredSeqno.has_value()) {
+    registeredSeqno =
+        ctx.fitnessManager->readySignal(&pop.newInds, pop.getId());
+  }
+  auto last = ctx.fitnessManager->lastEvaluation();
+  if (last.has_value() && last.value() < registeredSeqno.value()) {
+    return nullptr;
+  }
+
   auto selector = ctx.survivalSelectorCreator(ctx);
   size_t size = pop.size();
   pop.currentInds.clear();

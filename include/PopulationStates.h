@@ -55,4 +55,5 @@ public:
   std::string name() const override { return Name; }
 private:
   Context& ctx;
+  std::optional<uint32_t> registeredSeqno;
 };

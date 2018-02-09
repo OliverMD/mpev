@@ -10,6 +10,10 @@ class TournamentSelect {
 public:
   TournamentSelect(Context& ctx) : ctx{ctx} {}
   Individual &operator()(std::vector<Individual>& p);
+  Individual &operator()(Context::OldPop &old, Context::NewPop &newPop) {
+    return this->operator()(newPop);
+  }
+
 private:
   Context& ctx;
 };
@@ -17,6 +21,10 @@ private:
 class RouletteWheelSelect {
 public:
   Individual &operator()(std::vector<Individual>& p);
+  Individual &operator()(Context::OldPop &old, Context::NewPop &newPop) {
+    return this->operator()(newPop);
+  }
+
 private:
   std::vector<Individual*> inds;
   double fitSum;
@@ -26,13 +34,17 @@ class StraightCopySelector {
 public:
   StraightCopySelector() : init{false} {}
   Individual& operator()(std::vector<Individual>& p);
+  Individual &operator()(Context::OldPop &old, Context::NewPop &newPop) {
+    return this->operator()(newPop);
+  }
+
 private:
   std::vector<Individual>::iterator iter;
   bool init;
 };
 
-Context::Selector createTournSelect(Context& ctx);
+TournamentSelect createTournSelect(Context &ctx);
 
-Context::Selector createRouletteSelect(Context& ctx);
+RouletteWheelSelect createRouletteSelect(Context &ctx);
 
-Context::Selector createStraightCopy(Context&);
+StraightCopySelector createStraightCopy(Context &);

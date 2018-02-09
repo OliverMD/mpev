@@ -61,14 +61,14 @@ Individual& StraightCopySelector::operator()(std::vector<Individual> &p) {
   return *(iter++);
 }
 
-Context::Selector createTournSelect(Context& ctx) {
-return TournamentSelect{ctx};
+TournamentSelect createTournSelect(Context &ctx) {
+  return TournamentSelect{ctx};
 }
 
-Context::Selector createRouletteSelect(Context& ctx) {
-return RouletteWheelSelect{};
+RouletteWheelSelect createRouletteSelect(Context &ctx) {
+  return RouletteWheelSelect{};
 }
 
-Context::Selector createStraightCopy(Context&) {
+StraightCopySelector createStraightCopy(Context &) {
   return StraightCopySelector{};
 }

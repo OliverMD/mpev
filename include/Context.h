@@ -20,10 +20,13 @@ struct Context {
   using ReporterCallback = std::function<void(PopulationStats, uint32_t, size_t)>;
   using ObjectiveFunc = std::function<float(const IndividualRep*)>;
 
-  using Selector = std::function<Individual&(std::vector<Individual>&)>;
+  using VariationSelector =
+      std::function<Individual &(std::vector<Individual> &)>;
 
-  using VariationSelector = Selector;
-  using SurvivalSelector = Selector;
+  using NewPop = std::vector<Individual>;
+  using OldPop = std::vector<Individual>;
+
+  using SurvivalSelector = std::function<Individual &(NewPop &, OldPop &)>;
 
   using VarySelectorCreator = std::function<VariationSelector(Context&)>;
   using SurvivalSelectorCreator = std::function<SurvivalSelector(Context&)>;

@@ -43,8 +43,18 @@ private:
   bool init;
 };
 
+class TopSelector {
+public:
+  Individual& operator()(Context::OldPop& old, Context::NewPop& newPop);
+private:
+  std::vector<Individual*> inds;
+  std::vector<Individual*>::iterator iter;
+};
+
 TournamentSelect createTournSelect(Context &ctx);
 
 RouletteWheelSelect createRouletteSelect(Context &ctx);
 
 StraightCopySelector createStraightCopy(Context &);
+
+TopSelector createTopSelector(Context &);

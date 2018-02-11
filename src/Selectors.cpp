@@ -61,6 +61,28 @@ Individual& StraightCopySelector::operator()(std::vector<Individual> &p) {
   return *(iter++);
 }
 
+Individual& TopSelector::operator()(Context::OldPop &old,
+                                    Context::NewPop &newPop) {
+  if (inds.size() == 0) {
+    for (Individual &i : old) {
+      inds.insert(std::upper_bound(std::begin(inds), std::end(inds), &i,
+                                   [](const Individual *a,
+                                      const Individual *b) -> bool {
+                                     return a->fitness > b->fitness;
+                                   }), &i);
+    }
+    for (Individual &i : newPop) {
+      inds.insert(std::upper_bound(std::begin(inds), std::end(inds), &i,
+                                   [](const Individual *a,
+                                      const Individual *b) -> bool {
+                                     return a->fitness > b->fitness;
+                                   }), &i);
+    }
+    iter = std::begin(inds);
+  }
+  return **(iter++);
+}
+
 TournamentSelect createTournSelect(Context &ctx) {
   return TournamentSelect{ctx};
 }
@@ -71,4 +93,8 @@ RouletteWheelSelect createRouletteSelect(Context &ctx) {
 
 StraightCopySelector createStraightCopy(Context &) {
   return StraightCopySelector{};
+}
+
+TopSelector createTopSelector(Context&) {
+  return TopSelector{};
 }

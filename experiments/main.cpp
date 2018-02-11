@@ -117,12 +117,13 @@ Individual mutateOnesInd(Individual &a) {
   static std::mt19937 gen(
       rd()); // Standard mersenne_twister_engine seeded with rd()
   static std::uniform_real_distribution<float> dis{};
+  static std::uniform_int_distribution<bool> valDis{};
   Rep *aa = dynamic_cast<Rep *>(a.representation.get());
   std::vector<bool> r = aa->getSlice(0, NumBits);
   for (size_t i = 0; i < r.size(); ++i) {
     float z = dis(gen);
     if (z < MutationProb) {
-      r[i] = !r[i];
+      r[i] = valDis(gen);
     }
   }
 
@@ -190,7 +191,7 @@ int main(int argc, char* argv[]) {
   ctx.popSize = 25;
 
   ctx.fitnessManager = std::make_unique<
-      CoevFitnessManager<DefaultFitnessEv<ExpOne::fitnessFunc>>>(2, 10);
+      CoevFitnessManager<DefaultFitnessEv<ExpOne::fitnessFunc>>>(2, 15);
 
   std::ofstream oFile(resFile, std::ios::out);
   oFile << "gen,pop,max,min,mean,median,upper,lower" << std::endl;

@@ -87,11 +87,12 @@ std::unique_ptr<PopulationState> SurvivalState::execute(Population &pop) {
 
   auto selector = ctx.survivalSelectorCreator(ctx);
   size_t size = pop.size();
-  pop.currentInds.clear();
+  std::vector<Individual> newPop;
   for (size_t i = 0; i < size; ++i) {
     auto &ind = selector(pop.currentInds, pop.newInds);
-    pop.currentInds.emplace_back(ind.representation->copy(), 0);
+    newPop.emplace_back(ind.representation->copy(), 0);
   }
   pop.newInds.clear();
+  pop.currentInds.swap(newPop);
   return std::make_unique<EvaluateFitnessState>(ctx);
 }

@@ -20,10 +20,12 @@ private:
 
 class RouletteWheelSelect {
 public:
-  Individual &operator()(std::vector<Individual>& p);
-  Individual &operator()(Context::OldPop &old, Context::NewPop &newPop) {
-    return this->operator()(newPop);
+  Individual &operator()(std::vector<Individual>& p) {
+    // TODO: Tech Debt - Remove this workaround
+    std::vector<Individual> empty;
+    return this->operator()(p, empty);
   }
+  Individual &operator()(Context::OldPop &old, Context::NewPop &newPop);
 
 private:
   std::vector<Individual*> inds;

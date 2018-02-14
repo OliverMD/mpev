@@ -24,18 +24,26 @@ Individual& TournamentSelect::operator()(std::vector<Individual> &p) {
   return *ind;
 }
 
-Individual& RouletteWheelSelect::operator()(std::vector<Individual> &p) {
+Individual& RouletteWheelSelect::operator()(Context::OldPop &old, Context::NewPop &newPop) {
   static std::random_device
       rd; // Will be used to obtain a seed for the random number engine
   static std::mt19937 gen(
       rd()); // Standard mersenne_twister_engine seeded with rd()
   std::uniform_real_distribution<double> dis(0, 1);
   if (inds.size() == 0) {
-    for (Individual &i : p) {
+    for (Individual &i : old) {
       inds.insert(std::upper_bound(std::begin(inds), std::end(inds), &i,
                                    [](const Individual *a,
                                       const Individual *b) -> bool {
-                                     return a->fitness < b->fitness;
+                                     return a->fitness > b->fitness;
+                                   }), &i);
+      fitSum += i.fitness;
+    }
+    for (Individual &i : newPop) {
+      inds.insert(std::upper_bound(std::begin(inds), std::end(inds), &i,
+                                   [](const Individual *a,
+                                      const Individual *b) -> bool {
+                                     return a->fitness > b->fitness;
                                    }), &i);
       fitSum += i.fitness;
     }

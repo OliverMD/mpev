@@ -181,7 +181,7 @@ int main(int argc, char* argv[]) {
   ctx.individualMaker = ExpOne::makeOnesInd;
 
   ctx.varySelectorCreator = createRouletteSelect;
-  ctx.survivalSelectorCreator = createStraightCopy;
+  ctx.survivalSelectorCreator = createTopSelector;
 
   ctx.objectiveFunc = [](const IndividualRep* rep) {
     const ExpOne::Rep* a = dynamic_cast<const ExpOne::Rep *>(rep);

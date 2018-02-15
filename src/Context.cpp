@@ -6,5 +6,5 @@
 
 Context makeDefaultContext() {
   return Context{makeRandomIntIndivdual, crossoverIntIndividuals,
-                 mutateIntIndividual, 1};
+                 mutateIntIndividual, 1, 1};
 }

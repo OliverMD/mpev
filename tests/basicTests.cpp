@@ -273,15 +273,17 @@ TEST(BasicTests, VariationPopState_TwoPop) {
 }
 
 TEST(BasicTests, SurvivalPopState_TwoPop) {
+  constexpr size_t popCount = 2;
   const float expFitness = 50;
   auto fit = [](const IndividualRep *, const IndividualRep *) -> float {
     return 50;
   };
   Context ctx = makeDefaultContext();
   ctx.popSize = 3;
+  ctx.populationCount = popCount;
   ctx.individualMaker = &makeIntIndividual;
   ctx.fitnessManager =
-      std::make_unique<CoevFitnessManager<DefaultFitnessEv<fit>>>(2, 1);
+      std::make_unique<CoevFitnessManager<DefaultFitnessEv<fit>>>(popCount, 1);
   ctx.crossoverFunc = [](Individual &a, Individual &b) {
     std::vector<Individual> ret{};
     ret.emplace_back(std::make_unique<IntIndividualRep>(99), 0);

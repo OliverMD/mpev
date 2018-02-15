@@ -35,9 +35,10 @@ struct Context {
 
   Context() {}
   Context(IndividualMaker maker, CrossoverFunc cross, MutationFunc mut,
-          size_t tSize)
-      : individualMaker{maker}, crossoverFunc{cross},
-        mutationFunc{mut}, tournSize{tSize}, reporterCallback{nullptr} {}
+          size_t tSize, size_t popCount)
+      : individualMaker{maker}, crossoverFunc{cross}, mutationFunc{mut},
+        tournSize{tSize}, reporterCallback{nullptr}, populationCount{popCount} {
+  }
 
   std::unique_ptr<FitnessManager> fitnessManager;
   IndividualMaker individualMaker;
@@ -58,6 +59,8 @@ struct Context {
 
   VarySelectorCreator varySelectorCreator;
   SurvivalSelectorCreator survivalSelectorCreator;
+
+  size_t populationCount;
 };
 
 Context makeDefaultContext();

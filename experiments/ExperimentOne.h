@@ -3,6 +3,8 @@
 //
 #pragma once
 
+#include "OnesInd.h"
+
 namespace ExpOne {
 
 constexpr size_t NumBits = 100;
@@ -75,6 +77,7 @@ Individual mutateOnesInd(Individual &a) {
 }
 
 Context setup(std::ofstream &out) {
+  constexpr size_t popCount = 2;
   Context ctx = makeDefaultContext();
   ctx.tournSize = 5;
   ctx.mutationFunc = ExpOne::mutateOnesInd;
@@ -92,7 +95,8 @@ Context setup(std::ofstream &out) {
   ctx.popSize = 25;
 
   ctx.fitnessManager = std::make_unique<
-      CoevFitnessManager<DefaultFitnessEv<ExpOne::fitnessFunc>>>(2, 15);
+      CoevFitnessManager<DefaultFitnessEv<ExpOne::fitnessFunc>>>(popCount, 15);
+  ctx.populationCount = popCount;
 
   ctx.reporterCallback = [&out](PopulationStats stats, uint32_t popId,
                                 size_t gen) {

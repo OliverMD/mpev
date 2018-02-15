@@ -107,23 +107,7 @@ void evolve(size_t numGens, Context ctx, size_t numPops) {
   }
 }
 
-// Experiment 1
-int main(int argc, char* argv[]) {
-  // 1. Generate populations
-  // 2. For n generations
-  //    i. calculate fitness of each individual in each population
-  //        a. for each individual pick x random individuals from all other
-  //        populations b. test against all competitors and assign fitness
-  //    ii. selection for variation
-  //    iii. generate new individuals
-  //    iv. selection for replacement/survival
-
-  std::string resFile = "results.csv";
-
-  if (argc == 2) {
-    resFile = argv[1];
-  }
-
+void experimentOne(std::ofstream& out) {
   Context ctx = makeDefaultContext();
   ctx.tournSize = 5;
   ctx.mutationFunc = ExpOne::mutateOnesInd;
@@ -143,14 +127,26 @@ int main(int argc, char* argv[]) {
   ctx.fitnessManager = std::make_unique<
       CoevFitnessManager<DefaultFitnessEv<ExpOne::fitnessFunc>>>(2, 15);
 
-  std::ofstream oFile(resFile, std::ios::out);
-  oFile << "gen,pop,max,min,mean,median,upper,lower" << std::endl;
-
-  ctx.reporterCallback = [&oFile](PopulationStats stats, uint32_t popId, size_t gen) {
-    oFile << gen << "," << popId << "," << stats << std::endl;
+  ctx.reporterCallback = [&out](PopulationStats stats, uint32_t popId, size_t gen) {
+    out << gen << "," << popId << "," << stats << std::endl;
   };
 
   evolve(600, std::move(ctx), 2);
+}
+
+int main(int argc, char* argv[]) {
+
+  std::string resFile = "results.csv";
+
+  if (argc == 2) {
+    resFile = argv[1];
+  }
+
+  std::ofstream oFile(resFile, std::ios::out);
+  oFile << "gen,pop,max,min,mean,median,upper,lower" << std::endl;
+
+  experimentOne(oFile);
+
   oFile.close();
   return 0;
 }

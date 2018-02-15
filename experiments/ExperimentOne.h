@@ -4,6 +4,7 @@
 #pragma once
 
 #include "OnesInd.h"
+#include "include/Selectors.h"
 
 namespace ExpOne {
 

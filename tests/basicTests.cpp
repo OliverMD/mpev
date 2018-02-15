@@ -376,7 +376,7 @@ TEST(BasicTests, SurvivalPopState_TwoPop) {
   popTwo.step();
 
   newPop.step();
-  
+
   EXPECT_EQ(newPop.getState()->name(), EvaluateFitnessState::Name);
   EXPECT_EQ(popTwo.getState()->name(), EvaluateFitnessState::Name);
 

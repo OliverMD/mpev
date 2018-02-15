@@ -4,12 +4,6 @@
 
 #pragma once
 
-namespace ExpOne {
-
-// constexpr size_t NumBits = 100;
-// constexpr float CrossoverProb = 0;
-// constexpr float MutationProb = 0.05;
-
 template <size_t size, size_t Dimensions>
 class OnesIndRep : public IndividualRep {
 public:
@@ -73,4 +67,3 @@ public:
 private:
   std::array<std::vector<bool>, Dimensions> bits;
 };
-} // namespace ExpOne

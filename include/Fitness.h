@@ -196,6 +196,10 @@ private:
 
       CoevFitnessManager::iterator oppStart = begin(kv.first);
       CoevFitnessManager::iterator oppEnd = end(kv.first);
+      if (numPops == 1) {
+        oppStart = {{}, std::begin(pops), std::end(pops)};
+        oppEnd = {{}, std::end(pops), std::end(pops)};
+      }
 
       for (auto &ind : *kv.second) {
         std::vector<IndividualRep *> rPops;

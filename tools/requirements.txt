@@ -1,2 +1,3 @@
 display
 plotly>=2.2
+colorlover

@@ -7,6 +7,7 @@
 
 #include "ExperimentOne.h"
 #include "ExperimentTwo.h"
+#include "ExperimentThree.h"
 
 void evolve(size_t numGens, Context ctx) {
   std::vector<size_t> gens;
@@ -46,7 +47,7 @@ int main(int argc, char *argv[]) {
   oFile << "gen,pop,max,min,mean,median,upper,lower" << std::endl;
 
   // experimentOne(oFile);
-  evolve(600, ExpTwo::setup(oFile));
+  evolve(600, ExpThree::setup(oFile));
 
   oFile.close();
   return 0;

@@ -86,7 +86,7 @@ Context setup(std::ofstream &out, std::ofstream &sOut) {
   ctx.individualMaker = ExpOne::makeOnesInd;
 
   ctx.varySelectorCreator = createRouletteSelect;
-  ctx.survivalSelectorCreator = createTopSelector;
+  ctx.survivalSelectorCreator = createRouletteSelect;
 
   ctx.objectiveFunc = [](const IndividualRep *rep) {
     const ExpOne::Rep *a = dynamic_cast<const ExpOne::Rep *>(rep);

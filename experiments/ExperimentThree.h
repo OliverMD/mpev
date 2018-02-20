@@ -28,7 +28,7 @@ float fitnessFunc(const IndividualRep *a, const IndividualRep *b) {
 }
 
 Context setup(std::ofstream &out, std::ofstream &sOut) {
-  constexpr size_t popCount = 10;
+  constexpr size_t popCount = 2;
   Context ctx = makeDefaultContext();
   ctx.tournSize = 5;
   ctx.mutationFunc = ExpTwo::mutateOnesInd;
@@ -36,7 +36,7 @@ Context setup(std::ofstream &out, std::ofstream &sOut) {
   ctx.individualMaker = ExpTwo::makeOnesInd;
 
   ctx.varySelectorCreator = createRouletteSelect;
-  ctx.survivalSelectorCreator = createTopSelector;
+  ctx.survivalSelectorCreator = createRouletteSelect;
 
   ctx.objectiveFunc = [](const IndividualRep *rep) {
     const Rep *a = dynamic_cast<const Rep *>(rep);
@@ -47,7 +47,7 @@ Context setup(std::ofstream &out, std::ofstream &sOut) {
     return total;
   };
 
-  ctx.popSize = 5;
+  ctx.popSize = 25;
 
   ctx.fitnessManager = std::make_unique<
       CoevFitnessManager<DefaultFitnessEv<ExpThree::fitnessFunc>>>(popCount, 15);

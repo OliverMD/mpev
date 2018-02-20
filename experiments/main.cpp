@@ -28,27 +28,29 @@ void evolve(size_t numGens, Context ctx) {
         pops.at(i).step();
         if (pops.at(i).getState()->name() == VariationState::Name) {
           ++gens.at(i);
-          // std::cout << pops.at(i).getStats() << std::endl;
         }
       }
     }
   }
 }
 
+void iterExp(std::function<Context(std::ofstream &)> ctxGen, size_t count) {
+  for (uint i = 0; i < count; ++i) {
+    std::string filename =
+        std::string{"ob_results_"} + std::to_string(i) + std::string{".csv"};
+
+    std::ofstream oFile(filename, std::ios::out);
+    oFile << "gen,pop,max,min,mean,median,upper,lower" << std::endl;
+
+    evolve(600, ctxGen(oFile));
+
+    oFile.close();
+  }
+}
+
 int main(int argc, char *argv[]) {
 
-  std::string resFile = "results.csv";
+  iterExp(ExpThree::setup, 2);
 
-  if (argc == 2) {
-    resFile = argv[1];
-  }
-
-  std::ofstream oFile(resFile, std::ios::out);
-  oFile << "gen,pop,max,min,mean,median,upper,lower" << std::endl;
-
-  // experimentOne(oFile);
-  evolve(600, ExpThree::setup(oFile));
-
-  oFile.close();
   return 0;
 }

@@ -95,8 +95,8 @@ Context setup(std::ofstream &out) {
       CoevFitnessManager<DefaultFitnessEv<ExpTwo::fitnessFunc>>>(popCount, 15);
   ctx.populationCount = popCount;
 
-  ctx.reporterCallback = [&out](PopulationStats stats, uint32_t popId,
-                                size_t gen) {
+  ctx.objectiveReportCallback = [&out](PopulationStats stats, uint32_t popId,
+                                       size_t gen) {
     out << gen << "," << popId << "," << stats << std::endl;
   };
   return ctx;

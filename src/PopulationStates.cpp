@@ -49,15 +49,28 @@ EvaluateFitnessState::execute(Population &pop) {
 }
 
 std::unique_ptr<PopulationState> ReporterState::execute(Population &pop) {
-  if (ctx.reporterCallback == nullptr) {
+  if (ctx.objectiveReportCallback == nullptr) {
     return std::make_unique<VariationState>(ctx);
   }
   std::vector<float> fits;
+  std::vector<float> subFits;
   fits.reserve(pop.size());
+  subFits.reserve(pop.size());
   for (const auto& ind : pop.currentInds) {
     fits.emplace_back(ctx.objectiveFunc(ind.representation.get()));
+    subFits.emplace_back(ind.fitness);
   }
-  ctx.reporterCallback(Population::calculateFitnessStats(fits), pop.getId(), pop.age);
+
+  if (ctx.objectiveReportCallback != nullptr) {
+    ctx.objectiveReportCallback(Population::calculateFitnessStats(fits),
+                                pop.getId(), pop.age);
+  }
+
+  if (ctx.subjectiveReportCallback != nullptr) {
+    ctx.subjectiveReportCallback(Population::calculateFitnessStats(subFits),
+                                 pop.getId(), pop.age);
+  }
+
   ++pop.age;
   return std::make_unique<VariationState>(ctx);
 }

@@ -34,17 +34,24 @@ void evolve(size_t numGens, Context ctx) {
   }
 }
 
-void iterExp(std::function<Context(std::ofstream &)> ctxGen, size_t count) {
+void iterExp(std::function<Context(std::ofstream &, std::ofstream &)> ctxGen,
+             size_t count) {
   for (uint i = 0; i < count; ++i) {
-    std::string filename =
+    const std::string obFilename =
         std::string{"ob_results_"} + std::to_string(i) + std::string{".csv"};
+    const std::string subFilename =
+        std::string{"sub_results_"} + std::to_string(i) + std::string{".csv"};
 
-    std::ofstream oFile(filename, std::ios::out);
+    std::ofstream oFile(obFilename, std::ios::out);
+    std::ofstream sFile{subFilename, std::ios::out};
+
     oFile << "gen,pop,max,min,mean,median,upper,lower" << std::endl;
+    sFile << "gen,pop,max,min,mean,median,upper,lower" << std::endl;
 
-    evolve(600, ctxGen(oFile));
+    evolve(600, ctxGen(oFile, sFile));
 
     oFile.close();
+    sFile.close();
   }
 }
 

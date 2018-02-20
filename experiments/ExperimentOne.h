@@ -77,7 +77,7 @@ Individual mutateOnesInd(Individual &a) {
   return {std::make_unique<Rep>(std::array<std::vector<bool>, 1>{r}), 0};
 }
 
-Context setup(std::ofstream &out) {
+Context setup(std::ofstream &out, std::ofstream &sOut) {
   constexpr size_t popCount = 2;
   Context ctx = makeDefaultContext();
   ctx.tournSize = 5;
@@ -102,6 +102,11 @@ Context setup(std::ofstream &out) {
   ctx.objectiveReportCallback = [&out](PopulationStats stats, uint32_t popId,
                                        size_t gen) {
     out << gen << "," << popId << "," << stats << std::endl;
+  };
+
+  ctx.subjectiveReportCallback = [&sOut](PopulationStats stats, uint32_t popId,
+                                         size_t gen) {
+    sOut << gen << "," << popId << "," << stats << std::endl;
   };
   return ctx;
 }

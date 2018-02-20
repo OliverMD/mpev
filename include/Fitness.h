@@ -219,6 +219,7 @@ private:
     }
 
     seqNo++;
+    ev.clear();
     pops.clear();
   }
   const uint16_t numPops;

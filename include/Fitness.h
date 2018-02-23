@@ -85,102 +85,6 @@ public:
     }
   }
 
-  /**
-   * Provides a mechanism to iterate over IndividualRepresentations
-   */
-  class iterator {
-  public:
-    using iterator_category = std::forward_iterator_tag;
-    using value_type = IndividualRep *;
-    using reference = IndividualRep &;
-    using pointer = value_type;
-    using difference_type = size_t;
-
-    iterator() {}
-    iterator(std::vector<uint32_t> l) : excludedPops{l} {}
-    iterator(const iterator &other)
-        : excludedPops{other.excludedPops}, popIt{other.popIt},
-          indIt{other.indIt}, endIt{other.endIt} {}
-    iterator(std::vector<uint32_t> l, PopStore::const_iterator psi,
-             PopStore::const_iterator epsi)
-        : excludedPops{l}, popIt{psi}, endPopIt{epsi} {
-      if (popIt != endPopIt) {
-        indIt = std::begin(*popIt->second);
-        endIt = std::end(*popIt->second);
-      }
-    }
-    ~iterator() {}
-
-    iterator &operator=(const iterator &other) {
-      excludedPops = other.excludedPops;
-      popIt = other.popIt;
-      endPopIt = other.endPopIt;
-      indIt = other.indIt;
-      endIt = other.endIt;
-      return *this;
-    }
-    bool operator==(const iterator &other) const {
-      return (indIt == other.indIt) && (popIt == other.popIt) &&
-             (endPopIt == other.endPopIt) &&
-             (excludedPops == other.excludedPops) && (endIt == other.endIt);
-    }
-    bool operator!=(const iterator &other) const { return !(*this == other); }
-    iterator &operator++() {
-      // Urgh, this is horrible
-      if (popIt != endPopIt) {
-        if (indIt != endIt) {
-          ++indIt;
-        }
-        if (indIt == endIt) {
-          ++popIt;
-          if (popIt != endPopIt) {
-            while (std::find(std::begin(excludedPops), std::end(excludedPops),
-                             popIt->first) != std::end(excludedPops)) {
-              ++popIt;
-              if (popIt == endPopIt) {
-                break;
-              }
-            }
-          }
-
-          if (popIt != endPopIt) {
-            indIt = std::begin(*popIt->second);
-            endIt = std::end(*popIt->second);
-          } else {
-            indIt = {};
-            endIt = {};
-          }
-        }
-      }
-      return *this;
-    }
-    iterator operator++(int) {
-      auto ret = *this;
-      this->operator++();
-      return ret;
-    }
-
-    pointer operator*() const { return indIt->representation.get(); }
-    reference operator->() const { return *indIt->representation.get(); }
-
-    friend void swap(iterator &lhs, iterator &rhs);
-
-  private:
-    std::vector<uint32_t> excludedPops;
-    PopStore::const_iterator popIt;
-    PopStore::const_iterator endPopIt;
-    std::vector<Individual>::const_iterator indIt;
-    std::vector<Individual>::const_iterator endIt;
-  };
-
-  iterator begin(std::vector<uint32_t> exclude) {
-    return {exclude, std::begin(pops), std::end(pops)};
-  }
-
-  iterator end(std::vector<uint32_t> exclude) {
-    return {exclude, std::end(pops), std::end(pops)};
-  }
-
   void setCompMap(
       std::unordered_map<uint32_t, std::vector<uint32_t>> newMap) override {
     compMap = newMap;
@@ -188,13 +92,15 @@ public:
 
 private:
   void runEvaluation() {
-    // TODO: Have changeable policies
-
-    // TODO: Use structured bindings
     // TODO: Parallelise this
     // There is a potential tradeoff to be had here between parralleising it so
     // each population is evaluated by a different thread or updating the
     // fitness of all those individuals that take part in the tournament.
+
+    static std::random_device
+        rd; // Will be used to obtain a seed for the random number engine
+    static std::mt19937 gen(
+        rd()); // Standard mersenne_twister_engine seeded with rd()
 
     std::vector<uint32_t> allIds;
 
@@ -206,39 +112,33 @@ private:
       // Need to assign a fitness to each Individual in each population
       // O(nm)
 
-      CoevFitnessManager::iterator oppStart = begin({kv.first});
-      CoevFitnessManager::iterator oppEnd = end({kv.first});
-
+      std::vector<uint32_t> oppPops;
       if (compMap.find(kv.first) != std::end(compMap)) {
-        std::vector<uint32_t> toExclude;
-
-        // Iterate over all ids and add those to the exclude list if they are
-        // not in compMap.
-        for (const auto v : allIds) {
-          if (std::find(std::begin(compMap.at(kv.first)),
-                        std::end(compMap.at(kv.first)),
-                        v) == std::end(compMap.at(kv.first))) {
-            toExclude.push_back(v);
-          }
-        }
-
-        oppStart = begin(toExclude);
-        oppEnd = end(toExclude);
+        oppPops = compMap.at(kv.first);
+      } else {
+        oppPops = allIds;
+        oppPops.erase(
+            std::find(std::begin(oppPops), std::end(oppPops), kv.first));
       }
       if (numPops == 1) {
-        oppStart = {{}, std::begin(pops), std::end(pops)};
-        oppEnd = {{}, std::end(pops), std::end(pops)};
+        oppPops = allIds;
       }
 
       for (auto &ind : *kv.second) {
-        std::vector<IndividualRep *> rPops;
-        rPops.reserve(kv.second->size());
-        std::sample(oppStart, oppEnd, std::back_inserter(rPops), numOfOpponents,
-                    std::mt19937{std::random_device{}()});
+        std::vector<uint32_t> rPops;
 
-        auto riter = std::begin(rPops);
-        for (const auto &iter : rPops) {
-          ev.processPair(ind.representation.get(), iter);
+        while (rPops.size() < numOfOpponents) {
+          std::sample(std::begin(oppPops), std::end(oppPops),
+                      std::back_inserter(rPops), numOfOpponents - rPops.size(),
+                      gen);
+        }
+
+        for (const auto p : rPops) {
+          // Randomly choose a valid population
+          // Then choose a random individual from the population.
+          std::uniform_int_distribution<size_t> dis{0, pops.at(p)->size() - 1};
+          ev.processPair(ind.representation.get(),
+                         pops.at(p)->at(dis(gen)).representation.get());
         }
       }
 
@@ -258,11 +158,3 @@ private:
   FitEv ev;
   std::unordered_map<uint32_t, std::vector<uint32_t>> compMap;
 };
-
-template <typename FitEv>
-void swap(typename CoevFitnessManager<FitEv>::iterator &lhs,
-          typename CoevFitnessManager<FitEv>::iterator &rhs) {
-  typename CoevFitnessManager<FitEv>::iterator tmp = rhs;
-  rhs = lhs;
-  lhs = tmp;
-}

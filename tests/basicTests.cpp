@@ -46,10 +46,10 @@ TEST(BasicTests, FitnessManagerIterator) {
   auto seqOne = fitman.readySignal(&popOne);
   auto seqTwo = fitman.readySignal(&popTwo);
 
-  auto iter = fitman.begin(popOne.getId());
+  auto iter = fitman.begin({popOne.getId()});
   EXPECT_EQ(static_cast<IntIndividualRep *>(*iter)->getValue(), 48);
   ++iter;
-  EXPECT_EQ(iter == fitman.end(popOne.getId()), true);
+  EXPECT_EQ(iter == fitman.end({popOne.getId()}), true);
 }
 
 TEST(BasicTests, FitnessManager) {

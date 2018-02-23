@@ -16,9 +16,23 @@ void evolve(size_t numGens, Context ctx) {
   gens.resize(ctx.populationCount);
   std::fill(std::begin(gens), std::end(gens), 0);
 
+  std::unordered_map<uint32_t, std::vector<uint32_t>> actualMap;
+
   for (size_t i = 0; i < ctx.populationCount; ++i) {
     pops.emplace_back(std::make_unique<InitialPopState>(ctx));
   }
+
+  if (ctx.provisionalMap.size() > 0) {
+    // pops is vector so will still be in order
+    for (size_t i = 0; i < ctx.populationCount; ++i) {
+      actualMap[pops.at(i).getId()] = {};
+      for (auto v : ctx.provisionalMap[i]) {
+        actualMap[pops.at(i).getId()].push_back(pops.at(v).getId());
+      }
+    }
+  }
+
+  ctx.fitnessManager->setCompMap(actualMap);
 
   while (std::find_if(std::begin(gens), std::end(gens), [numGens](size_t x) {
            return x < numGens;

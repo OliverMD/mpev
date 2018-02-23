@@ -4,8 +4,9 @@
 
 #pragma once
 
-#include <optional>
 #include "Individual.h"
+#include <optional>
+#include <unordered_map>
 
 class Population;
 
@@ -18,4 +19,6 @@ public:
   virtual uint32_t readySignal(std::vector<Individual> *const pop,
                                uint32_t popId) = 0;
   virtual std::optional<uint32_t> lastEvaluation() = 0;
+  virtual void
+      setCompMap(std::unordered_map<uint32_t, std::vector<uint32_t>>) = 0;
 };

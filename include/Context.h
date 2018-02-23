@@ -33,7 +33,7 @@ struct Context {
 
   using PopSizeType = uint32_t;
 
-  Context() {}
+  Context() = delete;
   Context(IndividualMaker maker, CrossoverFunc cross, MutationFunc mut,
           size_t tSize, size_t popCount)
       : individualMaker{maker}, crossoverFunc{cross},
@@ -62,6 +62,8 @@ struct Context {
   SurvivalSelectorCreator survivalSelectorCreator;
 
   size_t populationCount;
+
+  std::vector<std::vector<uint32_t>> provisionalMap;
 };
 
 Context makeDefaultContext();

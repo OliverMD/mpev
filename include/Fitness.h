@@ -97,11 +97,11 @@ public:
     using difference_type = size_t;
 
     iterator() {}
-    iterator(std::initializer_list<uint32_t> l) : excludedPops{l} {}
+    iterator(std::vector<uint32_t> l) : excludedPops{l} {}
     iterator(const iterator &other)
         : excludedPops{other.excludedPops}, popIt{other.popIt},
           indIt{other.indIt}, endIt{other.endIt} {}
-    iterator(std::initializer_list<uint32_t> l, PopStore::const_iterator psi,
+    iterator(std::vector<uint32_t> l, PopStore::const_iterator psi,
              PopStore::const_iterator epsi)
         : excludedPops{l}, popIt{psi}, endPopIt{epsi} {
       if (popIt != endPopIt) {
@@ -173,12 +173,17 @@ public:
     std::vector<Individual>::const_iterator endIt;
   };
 
-  iterator begin(uint32_t exclude) {
-    return {{exclude}, std::begin(pops), std::end(pops)};
+  iterator begin(std::vector<uint32_t> exclude) {
+    return {exclude, std::begin(pops), std::end(pops)};
   }
 
-  iterator end(uint32_t exclude) {
-    return {{exclude}, std::end(pops), std::end(pops)};
+  iterator end(std::vector<uint32_t> exclude) {
+    return {exclude, std::end(pops), std::end(pops)};
+  }
+
+  void setCompMap(
+      std::unordered_map<uint32_t, std::vector<uint32_t>> newMap) override {
+    compMap = newMap;
   }
 
 private:
@@ -190,12 +195,36 @@ private:
     // There is a potential tradeoff to be had here between parralleising it so
     // each population is evaluated by a different thread or updating the
     // fitness of all those individuals that take part in the tournament.
+
+    std::vector<uint32_t> allIds;
+
+    for (const auto &kv : pops) {
+      allIds.push_back(kv.first);
+    }
+
     for (auto &kv : pops) {
       // Need to assign a fitness to each Individual in each population
       // O(nm)
 
-      CoevFitnessManager::iterator oppStart = begin(kv.first);
-      CoevFitnessManager::iterator oppEnd = end(kv.first);
+      CoevFitnessManager::iterator oppStart = begin({kv.first});
+      CoevFitnessManager::iterator oppEnd = end({kv.first});
+
+      if (compMap.find(kv.first) != std::end(compMap)) {
+        std::vector<uint32_t> toExclude;
+
+        // Iterate over all ids and add those to the exclude list if they are
+        // not in compMap.
+        for (const auto v : allIds) {
+          if (std::find(std::begin(compMap.at(kv.first)),
+                        std::end(compMap.at(kv.first)),
+                        v) == std::end(compMap.at(kv.first))) {
+            toExclude.push_back(v);
+          }
+        }
+
+        oppStart = begin(toExclude);
+        oppEnd = end(toExclude);
+      }
       if (numPops == 1) {
         oppStart = {{}, std::begin(pops), std::end(pops)};
         oppEnd = {{}, std::end(pops), std::end(pops)};
@@ -227,6 +256,7 @@ private:
   uint32_t seqNo;
   size_t numOfOpponents;
   FitEv ev;
+  std::unordered_map<uint32_t, std::vector<uint32_t>> compMap;
 };
 
 template <typename FitEv>

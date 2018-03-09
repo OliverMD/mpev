@@ -16,6 +16,8 @@ constexpr float CrossoverProb = 0;
 constexpr float MutationProb = 0.05;
 constexpr size_t Dimensions = 10;
 
+const std::string name = "ExpTwo";
+
 using Rep = OnesIndRep<NumBits, Dimensions>;
 
 Individual makeOnesInd() { return {std::make_unique<Rep>(), 0}; }

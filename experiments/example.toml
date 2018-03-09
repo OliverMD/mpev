@@ -1,0 +1,13 @@
+rootResultsLoc = "results/"
+
+[[experiments]]
+name = "ExpOne"
+runs = 4
+
+[[experiments]]
+name = "ExpTwo"
+runs = 4
+
+[[experiments]]
+name = "ExpThree"
+runs = 4

@@ -8,6 +8,7 @@
 
 namespace ExpThree {
 using Rep = ExpTwo::Rep;
+const std::string name = "ExpThree";
 float fitnessFunc(const IndividualRep *a, const IndividualRep *b) {
   const Rep *aa = dynamic_cast<const Rep *>(a);
   const Rep *bb = dynamic_cast<const Rep *>(b);

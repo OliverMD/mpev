@@ -1,4 +1,5 @@
 #include <array>
+#include <cpptoml.h>
 #include <experimental/filesystem>
 #include <fstream>
 #include <include/Context.h>
@@ -13,6 +14,11 @@
 namespace fs = std::experimental::filesystem;
 
 using ExperimentGen = std::function<Context(std::ofstream &, std::ofstream &)>;
+
+const std::unordered_map<std::string, ExperimentGen> setups = {
+    {ExpOne::name, ExpOne::setup},
+    {ExpTwo::name, ExpTwo::setup},
+    {ExpThree::name, ExpThree::setup}};
 
 struct ExperimentConfig {
   std::string name;
@@ -102,9 +108,60 @@ void runFromConfig(RunConfig cfg) {
   }
 }
 
-int main(int argc, char *argv[]) {
-  RunConfig runConfig{"./results/", {{"ExpThree", ExpThree::setup, 2, ""}}};
+RunConfig parseTomlConfig(fs::path configFile) {
+  auto config = cpptoml::parse_file(configFile.string());
 
+  RunConfig rConfig{};
+
+  auto loc = config->get_as<std::string>("rootResultsLoc");
+  if (!loc) {
+    throw std::runtime_error{"result location not found in config file"};
+  }
+  rConfig.rootResultsLoc = *loc;
+
+  auto tarr = config->get_table_array("experiments");
+
+  if (!tarr) {
+    throw std::runtime_error{"experiment array not found in config file"};
+  }
+
+  for (const auto &table : *tarr) {
+    ExperimentConfig eConfig{};
+
+    auto name = table->get_as<std::string>("name");
+    if (!name) {
+      throw std::runtime_error{"experiment has no name"};
+    }
+    eConfig.name = *name;
+    eConfig.ctxGen = setups.at(*name);
+
+    auto numRuns = table->get_as<uint>("runs");
+    if (!numRuns) {
+      throw std::runtime_error{"experiment has no runs"};
+    }
+    eConfig.numRuns = *numRuns;
+
+    auto desc = table->get_as<std::string>("description");
+    if (desc) {
+      eConfig.desc = *desc;
+    } else {
+      eConfig.desc = "";
+    }
+
+    rConfig.experiments.push_back(eConfig);
+  }
+  return rConfig;
+}
+
+int main(int argc, char *argv[]) {
+
+  if (argc != 2) {
+    std::cout << "Invalid arguments" << std::endl;
+    std::cout << "Example: ./experiments path/to/config.toml" << std::endl;
+    return 1;
+  }
+
+  RunConfig runConfig = parseTomlConfig(argv[1]);
   runFromConfig(runConfig);
 
   return 0;

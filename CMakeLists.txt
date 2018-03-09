@@ -51,7 +51,7 @@ endif()
 #target_link_libraries(example gtest_main)
 #add_test(NAME example_test COMMAND example)
 
-
+include_directories(before /usr/local/include/)
 include_directories(before ${CMAKE_CURRENT_SOURCE_DIR})
 file(GLOB INCLUDES
         "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h"

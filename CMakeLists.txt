@@ -2,12 +2,16 @@ cmake_minimum_required(VERSION 3.9)
 project(mpev)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
 IF (APPLE)
     # Use brew llvm version of libc++
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/llvm/lib")
+    # Use -lc++experimental for filesystem
+    # TODO: Remove experimental when upgrading to Clang 6
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/llvm/lib -lc++experimental")
+
 ENDIF (APPLE)
 
 # Download and unpack googletest at configure time

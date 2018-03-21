@@ -20,7 +20,7 @@ const std::string name = "ExpTwo";
 
 using Rep = OnesIndRep<NumBits, Dimensions>;
 
-Individual makeOnesInd() { return {std::make_unique<Rep>(), 0}; }
+Individual makeOnesInd(Context &ctx) { return {std::make_unique<Rep>(), 0}; }
 
 float fitnessFunc(const IndividualRep *a, const IndividualRep *b) {
   const Rep *aa = dynamic_cast<const Rep *>(a);
@@ -41,18 +41,15 @@ float fitnessFunc(const IndividualRep *a, const IndividualRep *b) {
   return aa->getNumOnes(dim) > bb->getNumOnes(dim) ? 1.0 : 0.0;
 }
 
-std::vector<Individual> crossOnesInds(Individual &a, Individual &b) {
+std::vector<Individual> crossOnesInds(Context &ctx, Individual &a,
+                                      Individual &b) {
   std::vector<Individual> ret{};
   Rep *aa = dynamic_cast<Rep *>(a.representation.get());
   ret.emplace_back(std::make_unique<Rep>(*aa), 0);
   return ret;
 }
 
-Individual mutateOnesInd(Individual &a) {
-  static std::random_device
-      rd; // Will be used to obtain a seed for the random number engine
-  static std::mt19937 gen(
-      rd()); // Standard mersenne_twister_engine seeded with rd()
+Individual mutateOnesInd(Context &ctx, Individual &a) {
   static std::uniform_real_distribution<float> dis{};
   static std::uniform_int_distribution<bool> valDis{};
   Rep *aa = dynamic_cast<Rep *>(a.representation.get());
@@ -61,9 +58,9 @@ Individual mutateOnesInd(Individual &a) {
   for (size_t d = 0; d < Dimensions; ++d) {
     std::vector<bool> r = aa->getSlice(d, 0, NumBits);
     for (size_t i = 0; i < r.size(); ++i) {
-      float z = dis(gen);
+      float z = dis(ctx.rng);
       if (z < MutationProb) {
-        r[i] = valDis(gen);
+        r[i] = valDis(ctx.rng);
       }
     }
     ret[d] = r;
@@ -71,9 +68,9 @@ Individual mutateOnesInd(Individual &a) {
   return {std::make_unique<Rep>(ret), 0};
 }
 
-Context setup(std::ofstream &out, std::ofstream &sOut) {
+Context setup(std::ofstream &out, std::ofstream &sOut, unsigned int seed) {
   constexpr size_t popCount = 2;
-  Context ctx = makeDefaultContext();
+  Context ctx = makeDefaultContext(seed);
   ctx.tournSize = 5;
   ctx.mutationFunc = mutateOnesInd;
   ctx.crossoverFunc = crossOnesInds;
@@ -94,7 +91,8 @@ Context setup(std::ofstream &out, std::ofstream &sOut) {
   ctx.popSize = 25;
 
   ctx.fitnessManager = std::make_unique<
-      CoevFitnessManager<DefaultFitnessEv<ExpTwo::fitnessFunc>>>(popCount, 15);
+      CoevFitnessManager<DefaultFitnessEv<ExpTwo::fitnessFunc>>>(ctx, popCount,
+                                                                 15);
   ctx.populationCount = popCount;
 
   ctx.objectiveReportCallback = [&out](PopulationStats stats, uint32_t popId,

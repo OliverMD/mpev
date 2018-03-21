@@ -4,7 +4,11 @@
 
 #include "include/Context.h"
 
-Context makeDefaultContext() {
-  return Context{makeRandomIntIndivdual, crossoverIntIndividuals,
-                 mutateIntIndividual, 1, 1};
+Context makeDefaultContext(unsigned int seed) {
+  return Context{makeRandomIntIndivdual,
+                 crossoverIntIndividuals,
+                 mutateIntIndividual,
+                 1,
+                 1,
+                 seed};
 }

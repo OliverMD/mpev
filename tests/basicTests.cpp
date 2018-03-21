@@ -183,7 +183,7 @@ TEST(BasicTests, VariationPopState_TwoPop) {
   ctx.individualMaker = &makeIntIndividual;
   ctx.fitnessManager =
       std::make_unique<CoevFitnessManager<DefaultFitnessEv<fit>>>(2, 1);
-  ctx.crossoverFunc = [](Individual &a, Individual &b) {
+  ctx.crossoverFunc = [](Context &c, Individual &a, Individual &b) {
     std::vector<Individual> ret{};
     ret.emplace_back(std::make_unique<IntIndividualRep>(99), 0);
     return ret;
@@ -284,7 +284,7 @@ TEST(BasicTests, SurvivalPopState_TwoPop) {
   ctx.individualMaker = &makeIntIndividual;
   ctx.fitnessManager =
       std::make_unique<CoevFitnessManager<DefaultFitnessEv<fit>>>(popCount, 1);
-  ctx.crossoverFunc = [](Individual &a, Individual &b) {
+  ctx.crossoverFunc = [](Context &c, Individual &a, Individual &b) {
     std::vector<Individual> ret{};
     ret.emplace_back(std::make_unique<IntIndividualRep>(99), 0);
     return ret;

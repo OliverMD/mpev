@@ -44,8 +44,10 @@ public:
    * @param numOfPops: The number of populations to wait for and evaluate
    * fitness for.
    */
-  CoevFitnessManager(uint16_t numOfPops, size_t numOpps, FitEv e = FitEv{})
-      : numPops{numOfPops}, numOfOpponents{numOpps}, seqNo{0}, ev{e} {}
+  CoevFitnessManager(Context &ctx, uint16_t numOfPops, size_t numOpps,
+                     FitEv e = FitEv{})
+      : ctx{ctx}, numPops{numOfPops}, numOfOpponents{numOpps}, seqNo{0}, ev{e} {
+  }
 
   /**
    * Signal that the population pop is ready for evaluation.
@@ -97,11 +99,6 @@ private:
     // each population is evaluated by a different thread or updating the
     // fitness of all those individuals that take part in the tournament.
 
-    static std::random_device
-        rd; // Will be used to obtain a seed for the random number engine
-    static std::mt19937 gen(
-        rd()); // Standard mersenne_twister_engine seeded with rd()
-
     std::vector<uint32_t> allIds;
 
     for (const auto &kv : pops) {
@@ -130,7 +127,7 @@ private:
         while (rPops.size() < numOfOpponents) {
           std::sample(std::begin(oppPops), std::end(oppPops),
                       std::back_inserter(rPops), numOfOpponents - rPops.size(),
-                      gen);
+                      ctx.rng);
         }
 
         for (const auto p : rPops) {
@@ -138,7 +135,7 @@ private:
           // Then choose a random individual from the population.
           std::uniform_int_distribution<size_t> dis{0, pops.at(p)->size() - 1};
           ev.processPair(ind.representation.get(),
-                         pops.at(p)->at(dis(gen)).representation.get());
+                         pops.at(p)->at(dis(ctx.rng)).representation.get());
         }
       }
 
@@ -156,5 +153,6 @@ private:
   uint32_t seqNo;
   size_t numOfOpponents;
   FitEv ev;
+  Context &ctx;
   std::unordered_map<uint32_t, std::vector<uint32_t>> compMap;
 };

@@ -28,9 +28,9 @@ float fitnessFunc(const IndividualRep *a, const IndividualRep *b) {
   return aa->getNumOnes(dim) > bb->getNumOnes(dim) ? 1.0 : 0.0;
 }
 
-Context setup(std::ofstream &out, std::ofstream &sOut) {
+Context setup(std::ofstream &out, std::ofstream &sOut, unsigned int seed) {
   constexpr size_t popCount = 2;
-  Context ctx = makeDefaultContext();
+  Context ctx = makeDefaultContext(seed);
   ctx.tournSize = 5;
   ctx.mutationFunc = ExpTwo::mutateOnesInd;
   ctx.crossoverFunc = ExpTwo::crossOnesInds;
@@ -51,7 +51,8 @@ Context setup(std::ofstream &out, std::ofstream &sOut) {
   ctx.popSize = 25;
 
   ctx.fitnessManager = std::make_unique<
-      CoevFitnessManager<DefaultFitnessEv<ExpThree::fitnessFunc>>>(popCount, 15);
+      CoevFitnessManager<DefaultFitnessEv<ExpThree::fitnessFunc>>>(
+      ctx, popCount, 15);
   ctx.populationCount = popCount;
 
   ctx.objectiveReportCallback = [&out](PopulationStats stats, uint32_t popId,

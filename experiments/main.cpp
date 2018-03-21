@@ -13,7 +13,8 @@
 
 namespace fs = std::experimental::filesystem;
 
-using ExperimentGen = std::function<Context(std::ofstream &, std::ofstream &)>;
+using ExperimentGen =
+    std::function<Context(std::ofstream &, std::ofstream &, unsigned int)>;
 
 const std::unordered_map<std::string, ExperimentGen> setups = {
     {ExpOne::name, ExpOne::setup},
@@ -78,6 +79,7 @@ void runFromConfig(RunConfig cfg) {
     fs::path thisResPath = resPath;
     thisResPath.append(exp.name);
     fs::create_directories(thisResPath);
+    std::vector<unsigned int> seeds;
 
     for (uint i = 0; i < exp.numRuns; ++i) {
       const std::string obFilename =
@@ -94,7 +96,9 @@ void runFromConfig(RunConfig cfg) {
       oFile << "gen,pop,max,min,mean,median,upper,lower" << std::endl;
       sFile << "gen,pop,max,min,mean,median,upper,lower" << std::endl;
 
-      evolve(600, exp.ctxGen(oFile, sFile));
+      unsigned int seed = std::random_device()();
+      seeds.push_back(seed);
+      evolve(600, exp.ctxGen(oFile, sFile, seed));
 
       oFile.close();
       sFile.close();
@@ -103,6 +107,16 @@ void runFromConfig(RunConfig cfg) {
     readmeFile << exp.name << std::endl << std::endl;
     readmeFile << "numRuns=" << exp.numRuns << std::endl;
     readmeFile << exp.desc << std::endl;
+
+    readmeFile << "seeds=";
+    for (auto seed = std::begin(seeds); seed != std::end(seeds); ++seed) {
+      if (seed == std::begin(seeds)) {
+        readmeFile << *seed;
+      } else {
+        readmeFile << "," << *seed;
+      }
+    }
+    readmeFile << std::endl;
 
     readmeFile.close();
   }

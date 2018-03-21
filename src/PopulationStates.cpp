@@ -20,7 +20,7 @@ std::unique_ptr<PopulationState> GeneratePopState::execute(Population &pop) {
   inds.reserve(ctx.popSize);
 
   for (Context::PopSizeType i = 0; i < ctx.popSize; ++i) {
-    inds.push_back(ctx.individualMaker());
+    inds.push_back(ctx.individualMaker(ctx));
   }
 
   pop.replacePopulation(std::move(inds));
@@ -79,10 +79,10 @@ std::unique_ptr<PopulationState> VariationState::execute(Population &pop) {
   pop.newInds.reserve(pop.size());
   auto selector = ctx.varySelectorCreator(ctx);
   for (size_t i = 0; i < pop.size(); ++i) {
-    auto inds =
-        ctx.crossoverFunc(selector(pop.currentInds), selector(pop.currentInds));
+    auto inds = ctx.crossoverFunc(ctx, selector(pop.currentInds),
+                                  selector(pop.currentInds));
     for (auto &ind : inds) {
-      pop.newInds.emplace_back(ctx.mutationFunc(ind));
+      pop.newInds.emplace_back(ctx.mutationFunc(ctx, ind));
     }
   }
   return std::make_unique<SurvivalState>(ctx);

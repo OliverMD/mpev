@@ -39,12 +39,12 @@ if __name__ == "__main__":
         traces.append(go.Scatter(x=v,
                                  y=vals[k],
                                  line=go.Line(color='rgb({},{},{})'
-                                              .format(*colors[k]))))
+                                              .format(*colors[k % 11]))))
         traces.append(go.Scatter(x=v + v[::-1],
                                  y=uppers[k] + lowers[k][::-1],
                                  fill='tozerox',
                                  fillcolor='rgba({},{},{},0.2)'
-                                 .format(*colors[k]),
+                                 .format(*colors[k % 11]),
                                  line=go.Line(color='transparent'),
                                  showlegend=False))
 

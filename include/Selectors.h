@@ -20,6 +20,7 @@ private:
 
 class RouletteWheelSelect {
 public:
+  RouletteWheelSelect(Context &ctx) : ctx{ctx} {}
   Individual &operator()(std::vector<Individual>& p) {
     // TODO: Tech Debt - Remove this workaround
     std::vector<Individual> empty;
@@ -30,6 +31,7 @@ public:
 private:
   std::vector<Individual*> inds;
   double fitSum;
+  Context &ctx;
 };
 
 class StraightCopySelector {

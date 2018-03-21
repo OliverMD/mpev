@@ -5,6 +5,7 @@
 
 #include <string>
 #include <vector>
+class Context;
 
 class IndividualRep {
 public:
@@ -37,8 +38,9 @@ struct Individual {
  * Basic Int individual maker
  * @return A random Individual with an IntIndividualRep
  */
-Individual makeRandomIntIndivdual();
+Individual makeRandomIntIndivdual(Context &ctx);
 
-std::vector<Individual> crossoverIntIndividuals(Individual& a, Individual& b);
+std::vector<Individual> crossoverIntIndividuals(Context &ctx, Individual &b,
+                                                Individual &a);
 
-Individual mutateIntIndividual(Individual& a);
+Individual mutateIntIndividual(Context &ctx, Individual &a);

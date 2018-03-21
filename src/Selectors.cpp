@@ -6,16 +6,12 @@
 #include "include/Selectors.h"
 
 Individual& TournamentSelect::operator()(std::vector<Individual> &p) {
-  static std::random_device
-      rd; // Will be used to obtain a seed for the random number engine
-  static std::mt19937 gen(
-      rd()); // Standard mersenne_twister_engine seeded with rd()
   std::uniform_int_distribution<size_t> dis(0, p.size() - 1);
 
-  Individual *ind = &(p.at(dis(gen)));
+  Individual *ind = &(p.at(dis(ctx.rng)));
 
   for (size_t i = 1; i < ctx.tournSize; ++i) {
-    Individual *test = &p[dis(gen)];
+    Individual *test = &p[dis(ctx.rng)];
     if (test->fitness > ind->fitness) {
       ind = test;
     }
@@ -25,10 +21,6 @@ Individual& TournamentSelect::operator()(std::vector<Individual> &p) {
 }
 
 Individual& RouletteWheelSelect::operator()(Context::OldPop &old, Context::NewPop &newPop) {
-  static std::random_device
-      rd; // Will be used to obtain a seed for the random number engine
-  static std::mt19937 gen(
-      rd()); // Standard mersenne_twister_engine seeded with rd()
   std::uniform_real_distribution<double> dis(0, 1);
   if (inds.size() == 0) {
     for (Individual &i : old) {
@@ -49,7 +41,7 @@ Individual& RouletteWheelSelect::operator()(Context::OldPop &old, Context::NewPo
     }
   }
 
-  double target = dis(gen) * fitSum;
+  double target = dis(ctx.rng) * fitSum;
   double total{0};
 
   for (Individual* ind : inds) {
@@ -96,7 +88,7 @@ TournamentSelect createTournSelect(Context &ctx) {
 }
 
 RouletteWheelSelect createRouletteSelect(Context &ctx) {
-  return RouletteWheelSelect{};
+  return RouletteWheelSelect{ctx};
 }
 
 StraightCopySelector createStraightCopy(Context &) {

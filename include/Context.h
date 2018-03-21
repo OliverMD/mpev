@@ -8,6 +8,7 @@
 #include "Stats.h"
 
 #include <functional>
+#include <random>
 
 /**
  * Context class that stores various helper functions and utilities and
@@ -35,10 +36,11 @@ struct Context {
 
   Context() = delete;
   Context(IndividualMaker maker, CrossoverFunc cross, MutationFunc mut,
-          size_t tSize, size_t popCount)
+          size_t tSize, size_t popCount, unsigned int seed)
       : individualMaker{maker}, crossoverFunc{cross},
         mutationFunc{mut}, tournSize{tSize}, objectiveReportCallback{nullptr},
-        subjectiveReportCallback{nullptr}, populationCount{popCount} {}
+        subjectiveReportCallback{nullptr},
+        populationCount{popCount}, rng{seed} {}
 
   std::unique_ptr<FitnessManager> fitnessManager;
   IndividualMaker individualMaker;
@@ -64,6 +66,10 @@ struct Context {
   size_t populationCount;
 
   std::vector<std::vector<uint32_t>> provisionalMap;
+
+  // TODO: If multithreading is ever added, this needs to be protected or
+  // duplicated across threads.
+  std::mt19937 rng;
 };
 
-Context makeDefaultContext();
+Context makeDefaultContext(unsigned int seed = std::random_device()());

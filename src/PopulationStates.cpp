@@ -59,6 +59,10 @@ std::unique_ptr<PopulationState> ReporterState::execute(Population &pop) {
   for (const auto& ind : pop.currentInds) {
     fits.emplace_back(ctx.objectiveFunc(ind.representation.get()));
     subFits.emplace_back(ind.fitness);
+    if (ctx.individualReportCallback != nullptr) {
+      ctx.individualReportCallback(ind.representation->toString(), pop.getId(),
+                                   pop.age);
+    }
   }
 
   if (ctx.objectiveReportCallback != nullptr) {

@@ -13,7 +13,7 @@ public:
     }
   }
 
-  std::string name() { return "Ones"; }
+  std::string name() override { return "Ones"; }
 
   size_t getNumOnes(size_t dim) const {
     uint cnt = 0;
@@ -40,8 +40,21 @@ public:
     return bits[i];
   }
 
-  std::unique_ptr<IndividualRep> copy() {
+  std::unique_ptr<IndividualRep> copy() override {
     return std::make_unique<OnesIndRep>(bits);
+  }
+
+  std::string toString() const override {
+    std::stringstream ss;
+    for (auto dit = std::cbegin(bits); dit != std::cend(bits); ++dit) {
+      if (dit != std::cbegin(bits)) {
+        ss << " ";
+      }
+      for (const auto &bit : *dit) {
+        ss << bit;
+      }
+    }
+    return ss.str();
   }
 
   /**

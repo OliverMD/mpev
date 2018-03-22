@@ -11,16 +11,18 @@ class IndividualRep {
 public:
   virtual std::string name() = 0;
   virtual std::unique_ptr<IndividualRep> copy() = 0;
+  virtual std::string toString() const = 0;
 };
 
 class IntIndividualRep : public IndividualRep {
 public:
   IntIndividualRep(int val) : value{val} {}
-  std::string name() { return "int"; }
+  std::string name() override { return "int"; }
   int getValue() { return value; }
-  std::unique_ptr<IndividualRep> copy() {
+  std::unique_ptr<IndividualRep> copy() override {
     return std::make_unique<IntIndividualRep>(value);
   }
+  std::string toString() const override { return std::to_string(value); }
 
 private:
   int value;

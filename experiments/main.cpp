@@ -13,8 +13,8 @@
 
 namespace fs = std::experimental::filesystem;
 
-using ExperimentGen =
-    std::function<Context(std::ofstream &, std::ofstream &, unsigned int)>;
+using ExperimentGen = std::function<Context(std::ofstream &, std::ofstream &,
+                                            std::ofstream &, unsigned int)>;
 
 const std::unordered_map<std::string, ExperimentGen> setups = {
     {ExpOne::name, ExpOne::setup},
@@ -86,22 +86,27 @@ void runFromConfig(RunConfig cfg) {
           std::string{"ob_results_"} + std::to_string(i) + std::string{".csv"};
       const std::string subFilename =
           std::string{"sub_results_"} + std::to_string(i) + std::string{".csv"};
+      const std::string indFilename =
+          std::string{"ind_reps_"} + std::to_string(i) + std::string{".csv"};
 
       std::ofstream oFile(thisResPath.append(obFilename), std::ios::out);
       thisResPath.remove_filename();
       std::ofstream sFile{thisResPath.append(subFilename), std::ios::out};
-
+      thisResPath.remove_filename();
+      std::ofstream iFile{thisResPath.append(indFilename), std::ios::out};
       thisResPath.remove_filename();
 
       oFile << "gen,pop,max,min,mean,median,upper,lower" << std::endl;
       sFile << "gen,pop,max,min,mean,median,upper,lower" << std::endl;
+      iFile << "gen,pop,individual" << std::endl;
 
       unsigned int seed = std::random_device()();
       seeds.push_back(seed);
-      evolve(600, exp.ctxGen(oFile, sFile, seed));
+      evolve(600, exp.ctxGen(oFile, sFile, iFile, seed));
 
       oFile.close();
       sFile.close();
+      iFile.close();
     }
     std::ofstream readmeFile{thisResPath.append("readme.txt"), std::ios::out};
     readmeFile << exp.name << std::endl << std::endl;

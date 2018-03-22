@@ -39,7 +39,7 @@ struct Context {
           size_t tSize, size_t popCount, unsigned int seed)
       : individualMaker{maker}, crossoverFunc{cross},
         mutationFunc{mut}, tournSize{tSize}, objectiveReportCallback{nullptr},
-        subjectiveReportCallback{nullptr},
+        subjectiveReportCallback{nullptr}, individualReportCallback{nullptr},
         populationCount{popCount}, rng{seed} {}
 
   std::unique_ptr<FitnessManager> fitnessManager;
@@ -58,6 +58,7 @@ struct Context {
   size_t tournSize;
   ReporterCallback objectiveReportCallback;
   ReporterCallback subjectiveReportCallback;
+  std::function<void(std::string, uint32_t, size_t)> individualReportCallback;
   ObjectiveFunc objectiveFunc;
 
   VarySelectorCreator varySelectorCreator;

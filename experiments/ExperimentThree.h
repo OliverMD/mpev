@@ -10,8 +10,8 @@ namespace ExpThree {
 using Rep = ExpTwo::Rep;
 const std::string name = "ExpThree";
 float fitnessFunc(const IndividualRep *a, const IndividualRep *b) {
-  const Rep *aa = dynamic_cast<const Rep *>(a);
-  const Rep *bb = dynamic_cast<const Rep *>(b);
+  const Rep *aa = static_cast<const Rep *>(a);
+  const Rep *bb = static_cast<const Rep *>(b);
 
   size_t dim = 0;
   size_t smallestDiff =

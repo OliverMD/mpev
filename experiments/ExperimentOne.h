@@ -51,8 +51,8 @@ std::vector<Individual> crossOnesInds(Context &ctx, Individual &a,
 }
 
 float fitnessFunc(const IndividualRep *a, const IndividualRep *b) {
-  const Rep *aa = dynamic_cast<const Rep *>(a);
-  const Rep *bb = dynamic_cast<const Rep *>(b);
+  const Rep *aa = static_cast<const Rep *>(a);
+  const Rep *bb = static_cast<const Rep *>(b);
 
   return aa->getNumOnes(0) > bb->getNumOnes(0) ? 1.0 : 0.0;
 }

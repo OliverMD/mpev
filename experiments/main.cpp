@@ -180,6 +180,11 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
+  std::cout << "Waiting for input..." << std::endl;
+  std::string in;
+  std::cin >> in;
+  std::cout << "Input received! Starting..." << std::endl;
+
   RunConfig runConfig = parseTomlConfig(argv[1]);
   runFromConfig(runConfig);
 

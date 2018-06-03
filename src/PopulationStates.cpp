@@ -105,6 +105,7 @@ std::unique_ptr<PopulationState> SurvivalState::execute(Population &pop) {
   auto selector = ctx.survivalSelectorCreator(ctx);
   size_t size = pop.size();
   std::vector<Individual> newPop;
+  newPop.reserve(size);
   for (size_t i = 0; i < size; ++i) {
     auto &ind = selector(pop.currentInds, pop.newInds);
     newPop.emplace_back(ind.representation->copy(), 0);

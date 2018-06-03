@@ -22,43 +22,12 @@ TEST(BasicTests, Population) {
   EXPECT_EQ(newPop.begin()->fitness, fit);
 }
 
-TEST(BasicTests, FitnessManagerIterator) {
-  auto fit = [](const IndividualRep *a, const IndividualRep *b) {
-    return (float)88;
-  };
-  CoevFitnessManager<DefaultFitnessEv<fit>> fitman{3, 1};
-  Context ctx = makeDefaultContext();
-
-  Population popOne{std::make_unique<InitialPopState>(ctx)};
-  Population popTwo{std::make_unique<InitialPopState>(ctx)};
-
-  std::vector<Individual> test;
-
-  test.emplace_back(std::make_unique<IntIndividualRep>(34), 0);
-  popOne.replacePopulation(std::move(test));
-
-  test.clear();
-
-  test.emplace_back(std::make_unique<IntIndividualRep>(48), 0);
-  popTwo.replacePopulation(std::move(test));
-
-  // Test iterator
-  auto seqOne = fitman.readySignal(&popOne);
-  auto seqTwo = fitman.readySignal(&popTwo);
-
-  auto iter = fitman.begin({popOne.getId()});
-  EXPECT_EQ(static_cast<IntIndividualRep *>(*iter)->getValue(), 48);
-  ++iter;
-  EXPECT_EQ(iter == fitman.end({popOne.getId()}), true);
-}
-
 TEST(BasicTests, FitnessManager) {
   auto fit = [](const IndividualRep *a, const IndividualRep *b) {
     return (float)88;
   };
-  CoevFitnessManager<DefaultFitnessEv<fit>> fitman{2, 1};
-
   Context ctx = makeDefaultContext();
+  CoevFitnessManager<DefaultFitnessEv<fit>> fitman{ctx, 2, 1};
 
   Population popOne{std::make_unique<InitialPopState>(ctx)};
   Population popTwo{std::make_unique<InitialPopState>(ctx)};
@@ -84,7 +53,7 @@ TEST(BasicTests, FitnessManager) {
   EXPECT_EQ(popTwo.begin()->fitness, 88);
 }
 
-Individual makeIntIndividual() {
+Individual makeIntIndividual(Context &ctx) {
   return {std::make_unique<IntIndividualRep>(5), 0};
 }
 
@@ -115,7 +84,7 @@ TEST(BasicTests, EvalFitnessPopState_OnePop) {
   ctx.popSize = 3;
   ctx.individualMaker = &makeIntIndividual;
   ctx.fitnessManager =
-      std::make_unique<CoevFitnessManager<DefaultFitnessEv<fit>>>(1, 1);
+      std::make_unique<CoevFitnessManager<DefaultFitnessEv<fit>>>(ctx, 1, 1);
   Population newPop(std::make_unique<InitialPopState>(ctx));
 
   newPop.step();
@@ -144,7 +113,7 @@ TEST(BasicTests, VariationPopState_OnePop) {
   ctx.popSize = 3;
   ctx.individualMaker = &makeIntIndividual;
   ctx.fitnessManager =
-      std::make_unique<CoevFitnessManager<DefaultFitnessEv<fit>>>(1, 1);
+      std::make_unique<CoevFitnessManager<DefaultFitnessEv<fit>>>(ctx, 1, 1);
   ctx.varySelectorCreator = createTournSelect;
   ctx.survivalSelectorCreator = createTournSelect;
   Population newPop(std::make_unique<InitialPopState>(ctx));
@@ -182,7 +151,7 @@ TEST(BasicTests, VariationPopState_TwoPop) {
   ctx.popSize = 3;
   ctx.individualMaker = &makeIntIndividual;
   ctx.fitnessManager =
-      std::make_unique<CoevFitnessManager<DefaultFitnessEv<fit>>>(2, 1);
+      std::make_unique<CoevFitnessManager<DefaultFitnessEv<fit>>>(ctx, 2, 1);
   ctx.crossoverFunc = [](Context &c, Individual &a, Individual &b) {
     std::vector<Individual> ret{};
     ret.emplace_back(std::make_unique<IntIndividualRep>(99), 0);
@@ -191,7 +160,7 @@ TEST(BasicTests, VariationPopState_TwoPop) {
   ctx.varySelectorCreator = createTournSelect;
   ctx.survivalSelectorCreator = createTournSelect;
 
-  ctx.mutationFunc = [](Individual &a) -> Individual {
+  ctx.mutationFunc = [](Context &ctx, Individual &a) -> Individual {
     return {std::make_unique<IntIndividualRep>(
                 1 + dynamic_cast<IntIndividualRep *>(a.representation.get())
                         ->getValue()),
@@ -283,7 +252,8 @@ TEST(BasicTests, SurvivalPopState_TwoPop) {
   ctx.populationCount = popCount;
   ctx.individualMaker = &makeIntIndividual;
   ctx.fitnessManager =
-      std::make_unique<CoevFitnessManager<DefaultFitnessEv<fit>>>(popCount, 1);
+      std::make_unique<CoevFitnessManager<DefaultFitnessEv<fit>>>(ctx, popCount,
+                                                                  1);
   ctx.crossoverFunc = [](Context &c, Individual &a, Individual &b) {
     std::vector<Individual> ret{};
     ret.emplace_back(std::make_unique<IntIndividualRep>(99), 0);
@@ -292,7 +262,7 @@ TEST(BasicTests, SurvivalPopState_TwoPop) {
   ctx.varySelectorCreator = createTournSelect;
   ctx.survivalSelectorCreator = createTournSelect;
 
-  ctx.mutationFunc = [](Individual &a) -> Individual {
+  ctx.mutationFunc = [](Context &context, Individual &a) -> Individual {
     return {std::make_unique<IntIndividualRep>(
         1 + dynamic_cast<IntIndividualRep *>(a.representation.get())
             ->getValue()),

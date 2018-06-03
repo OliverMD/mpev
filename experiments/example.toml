@@ -1,13 +1,13 @@
 rootResultsLoc = "results/"
 
 [[experiments]]
-name = "ExpOne"
-runs = 50
+game = "ExpOne"
+runs = 1
 
 [[experiments]]
-name = "ExpTwo"
-runs = 50
+game = "ExpTwo"
+runs = 1
 
 [[experiments]]
-name = "ExpThree"
-runs = 50
+game = "ExpThree"
+runs = 1

@@ -22,7 +22,7 @@ const std::unordered_map<std::string, ExperimentGen> setups = {
     {ExpThree::name, ExpThree::setup}};
 
 struct ExperimentConfig {
-  std::string name;
+  std::string game;
   ExperimentGen ctxGen;
   uint numRuns;
   std::string desc;
@@ -77,7 +77,7 @@ void runFromConfig(RunConfig cfg) {
 
   for (const auto &exp : cfg.experiments) {
     fs::path thisResPath = resPath;
-    thisResPath.append(exp.name);
+    thisResPath.append(exp.game);
     fs::create_directories(thisResPath);
     std::vector<unsigned int> seeds;
 
@@ -109,7 +109,7 @@ void runFromConfig(RunConfig cfg) {
       iFile.close();
     }
     std::ofstream readmeFile{thisResPath.append("readme.txt"), std::ios::out};
-    readmeFile << exp.name << std::endl << std::endl;
+    readmeFile << exp.game << std::endl << std::endl;
     readmeFile << "numRuns=" << exp.numRuns << std::endl;
     readmeFile << exp.desc << std::endl;
 
@@ -147,12 +147,12 @@ RunConfig parseTomlConfig(fs::path configFile) {
   for (const auto &table : *tarr) {
     ExperimentConfig eConfig{};
 
-    auto name = table->get_as<std::string>("name");
-    if (!name) {
-      throw std::runtime_error{"experiment has no name"};
+    auto game = table->get_as<std::string>("game");
+    if (!game) {
+      throw std::runtime_error{"experiment has no game"};
     }
-    eConfig.name = *name;
-    eConfig.ctxGen = setups.at(*name);
+    eConfig.game = *game;
+    eConfig.ctxGen = setups.at(*game);
 
     auto numRuns = table->get_as<uint>("runs");
     if (!numRuns) {

@@ -89,7 +89,7 @@ Context setup(std::ofstream &out, std::ofstream &sOut, std::ofstream &iOut,
     return a->getNumOnes(0);
   };
 
-  ctx.popSize = 5;
+  ctx.popSize = 25;
 
   ctx.fitnessManager = std::make_unique<
       CoevFitnessManager<DefaultFitnessEv<ExpOne::fitnessFunc>>>(ctx, popCount,

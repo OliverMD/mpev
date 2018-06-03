@@ -2,12 +2,12 @@ rootResultsLoc = "results/"
 
 [[experiments]]
 name = "ExpOne"
-runs = 1
+runs = 50
 
 [[experiments]]
 name = "ExpTwo"
-runs = 1
+runs = 50
 
 [[experiments]]
 name = "ExpThree"
-runs = 1
+runs = 50

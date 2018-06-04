@@ -16,7 +16,7 @@ namespace fs = std::experimental::filesystem;
 
 using ExperimentGen = std::function<Context(std::ofstream &, std::ofstream &,
                                             std::ofstream &, unsigned int,
-                                            size_t, size_t)>;
+                                            size_t, size_t, size_t)>;
 
 const std::unordered_map<std::string, ExperimentGen> setups = {
     {ExpOne::name, ExpOne::setup},
@@ -30,6 +30,7 @@ struct ExperimentConfig {
   std::string desc;
   size_t numPops;
   size_t numInds;
+  size_t numCompetitions;
 };
 
 struct RunConfig {
@@ -103,7 +104,7 @@ void runExperiment(ExperimentConfig exp, fs::path resPath) {
 
     unsigned int seed = std::random_device()();
     seeds.push_back(seed);
-    evolve(600, exp.ctxGen(oFile, sFile, iFile, seed, exp.numPops, exp.numInds));
+    evolve(600, exp.ctxGen(oFile, sFile, iFile, seed, exp.numPops, exp.numInds, exp.numCompetitions));
 
     oFile.close();
     sFile.close();
@@ -193,6 +194,13 @@ RunConfig parseTomlConfig(fs::path configFile) {
       eConfig.numInds = *numInds;
     } else {
       eConfig.numInds = 0;
+    }
+
+    auto numComps = table->get_as<uint>("numComps");
+    if (numPops) {
+      eConfig.numCompetitions = *numComps;
+    } else {
+      eConfig.numCompetitions = 0;
     }
 
     rConfig.experiments.push_back(eConfig);

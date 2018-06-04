@@ -5,15 +5,18 @@ game = "ExpOne"
 runs = 1
 numPops = 5
 numInds = 10
+numComps = 15
 
 [[experiments]]
 game = "ExpTwo"
 runs = 1
 numPops = 5
 numInds = 10
+numComps = 15
 
 [[experiments]]
 game = "ExpThree"
 runs = 1
 numPops = 5
 numInds = 10
+numComps = 15

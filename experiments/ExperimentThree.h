@@ -29,7 +29,7 @@ float fitnessFunc(const IndividualRep *a, const IndividualRep *b) {
 }
 
 Context setup(std::ofstream &out, std::ofstream &sOut, std::ofstream &iOut,
-              unsigned int seed, size_t popCount, size_t popSize) {
+              unsigned int seed, size_t popCount, size_t popSize, size_t numComps) {
   Context ctx = makeDefaultContext(seed);
   ctx.tournSize = 5;
   ctx.mutationFunc = ExpTwo::mutateOnesInd;

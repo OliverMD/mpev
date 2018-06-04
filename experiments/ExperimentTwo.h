@@ -69,7 +69,7 @@ Individual mutateOnesInd(Context &ctx, Individual &a) {
 }
 
 Context setup(std::ofstream &out, std::ofstream &sOut, std::ofstream &iOut,
-              unsigned int seed, size_t popCount, size_t popSize) {
+              unsigned int seed, size_t popCount, size_t popSize, size_t numComps) {
   Context ctx = makeDefaultContext(seed);
   ctx.tournSize = 5;
   ctx.mutationFunc = mutateOnesInd;
@@ -92,7 +92,7 @@ Context setup(std::ofstream &out, std::ofstream &sOut, std::ofstream &iOut,
 
   ctx.fitnessManager = std::make_unique<
       CoevFitnessManager<DefaultFitnessEv<ExpTwo::fitnessFunc>>>(ctx, popCount,
-                                                                 15);
+                                                                 numComps);
   ctx.populationCount = popCount;
 
   ctx.objectiveReportCallback = [&out](PopulationStats stats, uint32_t popId,

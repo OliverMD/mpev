@@ -6,6 +6,7 @@
 #include <include/Fitness.h>
 #include <include/PopulationStates.h>
 #include <iostream>
+#include <thread>
 
 #include "ExperimentOne.h"
 #include "ExperimentTwo.h"
@@ -72,58 +73,68 @@ void evolve(size_t numGens, Context ctx) {
   }
 }
 
+void runExperiment(ExperimentConfig exp, fs::path resPath) {
+  fs::path thisResPath = resPath;
+  thisResPath.append(exp.game);
+  fs::create_directories(thisResPath);
+  std::vector<unsigned int> seeds;
+
+  for (uint i = 0; i < exp.numRuns; ++i) {
+    const std::string obFilename =
+        std::string{"ob_results_"} + std::to_string(i) + std::string{".csv"};
+    const std::string subFilename =
+        std::string{"sub_results_"} + std::to_string(i) + std::string{".csv"};
+    const std::string indFilename =
+        std::string{"ind_reps_"} + std::to_string(i) + std::string{".csv"};
+
+    std::ofstream oFile(thisResPath.append(obFilename), std::ios::out);
+    thisResPath.remove_filename();
+    std::ofstream sFile{thisResPath.append(subFilename), std::ios::out};
+    thisResPath.remove_filename();
+    std::ofstream iFile{thisResPath.append(indFilename), std::ios::out};
+    thisResPath.remove_filename();
+
+    oFile << "gen,pop,max,min,mean,median,upper,lower" << std::endl;
+    sFile << "gen,pop,max,min,mean,median,upper,lower" << std::endl;
+    iFile << "gen,pop,individual" << std::endl;
+
+    unsigned int seed = std::random_device()();
+    seeds.push_back(seed);
+    evolve(600, exp.ctxGen(oFile, sFile, iFile, seed));
+
+    oFile.close();
+    sFile.close();
+    iFile.close();
+  }
+  std::ofstream readmeFile{thisResPath.append("readme.txt"), std::ios::out};
+  readmeFile << exp.game << std::endl << std::endl;
+  readmeFile << "numRuns=" << exp.numRuns << std::endl;
+  readmeFile << exp.desc << std::endl;
+
+  readmeFile << "seeds=";
+  for (auto seed = std::begin(seeds); seed != std::end(seeds); ++seed) {
+    if (seed == std::begin(seeds)) {
+      readmeFile << *seed;
+    } else {
+      readmeFile << "," << *seed;
+    }
+  }
+  readmeFile << std::endl;
+
+  readmeFile.close();
+}
+
 void runFromConfig(RunConfig cfg) {
   const auto resPath = fs::path{cfg.rootResultsLoc};
 
+  std::vector<std::thread> threads;
   for (const auto &exp : cfg.experiments) {
-    fs::path thisResPath = resPath;
-    thisResPath.append(exp.game);
-    fs::create_directories(thisResPath);
-    std::vector<unsigned int> seeds;
+    std::thread nt(runExperiment, exp, resPath);
+    threads.push_back(std::move(nt));
+  }
 
-    for (uint i = 0; i < exp.numRuns; ++i) {
-      const std::string obFilename =
-          std::string{"ob_results_"} + std::to_string(i) + std::string{".csv"};
-      const std::string subFilename =
-          std::string{"sub_results_"} + std::to_string(i) + std::string{".csv"};
-      const std::string indFilename =
-          std::string{"ind_reps_"} + std::to_string(i) + std::string{".csv"};
-
-      std::ofstream oFile(thisResPath.append(obFilename), std::ios::out);
-      thisResPath.remove_filename();
-      std::ofstream sFile{thisResPath.append(subFilename), std::ios::out};
-      thisResPath.remove_filename();
-      std::ofstream iFile{thisResPath.append(indFilename), std::ios::out};
-      thisResPath.remove_filename();
-
-      oFile << "gen,pop,max,min,mean,median,upper,lower" << std::endl;
-      sFile << "gen,pop,max,min,mean,median,upper,lower" << std::endl;
-      iFile << "gen,pop,individual" << std::endl;
-
-      unsigned int seed = std::random_device()();
-      seeds.push_back(seed);
-      evolve(600, exp.ctxGen(oFile, sFile, iFile, seed));
-
-      oFile.close();
-      sFile.close();
-      iFile.close();
-    }
-    std::ofstream readmeFile{thisResPath.append("readme.txt"), std::ios::out};
-    readmeFile << exp.game << std::endl << std::endl;
-    readmeFile << "numRuns=" << exp.numRuns << std::endl;
-    readmeFile << exp.desc << std::endl;
-
-    readmeFile << "seeds=";
-    for (auto seed = std::begin(seeds); seed != std::end(seeds); ++seed) {
-      if (seed == std::begin(seeds)) {
-        readmeFile << *seed;
-      } else {
-        readmeFile << "," << *seed;
-      }
-    }
-    readmeFile << std::endl;
-
-    readmeFile.close();
+  for (auto& th: threads) {
+    th.join();
   }
 }
 

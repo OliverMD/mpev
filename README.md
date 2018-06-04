@@ -20,13 +20,5 @@ mkdir build && cd build && cmake -D CMAKE_CXX_COMPILER=/usr/local/Cellar/llvm/5.
 ```
 
 ## To do
-* Store the random seed in the context and use a common generator across all
-things that need randomness.
-* Support reading in a TOML file to run multiple configurations with different
-parameters
 * Display progress information on std::out
 * Tidy up & improve tests
-* Add more reporting mechanisms, eg. report the absolute & relative fitness of
-each individual
-* Add concurrency support. I plan on doing this with Folly futures
-(https://github.com/facebook/folly).

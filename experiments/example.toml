@@ -3,11 +3,17 @@ rootResultsLoc = "results/"
 [[experiments]]
 game = "ExpOne"
 runs = 1
+numPops = 5
+numInds = 10
 
 [[experiments]]
 game = "ExpTwo"
 runs = 1
+numPops = 5
+numInds = 10
 
 [[experiments]]
 game = "ExpThree"
 runs = 1
+numPops = 5
+numInds = 10

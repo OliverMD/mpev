@@ -186,21 +186,21 @@ RunConfig parseTomlConfig(fs::path configFile) {
     if (numPops) {
       eConfig.numPops = *numPops;
     } else {
-      eConfig.numPops = 0;
+      throw std::runtime_error{"numPops must be specified"};
     }
 
     auto numInds = table->get_as<uint>("numInds");
-    if (numPops) {
+    if (numInds) {
       eConfig.numInds = *numInds;
     } else {
-      eConfig.numInds = 0;
+      throw std::runtime_error{"numInds must be specified"};
     }
 
     auto numComps = table->get_as<uint>("numComps");
-    if (numPops) {
+    if (numComps) {
       eConfig.numCompetitions = *numComps;
     } else {
-      eConfig.numCompetitions = 0;
+      throw std::runtime_error{"numComps must be specified"};
     }
 
     rConfig.experiments.push_back(eConfig);
@@ -221,7 +221,13 @@ int main(int argc, char *argv[]) {
   std::cin >> in;
   std::cout << "Input received! Starting..." << std::endl;
 
-  RunConfig runConfig = parseTomlConfig(argv[1]);
+  RunConfig runConfig;
+  try {
+    runConfig = parseTomlConfig(argv[1]);
+  } catch (std::runtime_error& e) {
+    std::cout << "Error parsing config: " << e.what() << std::endl;
+    return 1;
+  }
   runFromConfig(runConfig);
 
   return 0;

@@ -25,6 +25,7 @@ const std::unordered_map<std::string, ExperimentGen> setups = {
 
 struct ExperimentConfig {
   std::string game;
+  std::string name;
   ExperimentGen ctxGen;
   uint numRuns;
   std::string desc;
@@ -79,7 +80,7 @@ void evolve(size_t numGens, Context ctx) {
 
 void runExperiment(ExperimentConfig exp, fs::path resPath) {
   fs::path thisResPath = resPath;
-  thisResPath.append(exp.game);
+  thisResPath.append(exp.name);
   fs::create_directories(thisResPath);
   std::vector<unsigned int> seeds;
 
@@ -168,6 +169,12 @@ RunConfig parseTomlConfig(fs::path configFile) {
     }
     eConfig.game = *game;
     eConfig.ctxGen = setups.at(*game);
+
+    auto name = table->get_as<std::string>("name");
+    if (!name) {
+      throw std::runtime_error{"experiment has no name"};
+    }
+    eConfig.name = *name;
 
     auto numRuns = table->get_as<uint>("runs");
     if (!numRuns) {

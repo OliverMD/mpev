@@ -2,6 +2,7 @@ rootResultsLoc = "results/"
 
 [[experiments]]
 game = "ExpOne"
+name = "ExpOne:pops5inds10S15"
 runs = 1
 numPops = 5
 numInds = 10
@@ -9,6 +10,7 @@ numComps = 15
 
 [[experiments]]
 game = "ExpTwo"
+name = "ExpTwo:pops5inds10S15"
 runs = 1
 numPops = 5
 numInds = 10
@@ -16,6 +18,7 @@ numComps = 15
 
 [[experiments]]
 game = "ExpThree"
+name = "ExpThree:pops5inds10S15"
 runs = 1
 numPops = 5
 numInds = 10

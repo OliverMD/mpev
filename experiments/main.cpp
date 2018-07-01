@@ -156,9 +156,11 @@ void runExperiment(ExperimentConfig exp, fs::path resPath) {
   readmeFile.close();
 }
 
-void runFromConfig(RunConfig cfg) {
+void runFromConfig(RunConfig cfg, std::string configFile) {
   const auto resPath = fs::path{cfg.rootResultsLoc};
-
+  fs::create_directories(resPath);
+  fs::copy_file(fs::path{configFile},
+                fs::path{cfg.rootResultsLoc}.append("config.toml"));
   std::vector<std::thread> threads;
   for (const auto &exp : cfg.experiments) {
     std::thread nt(runExperiment, exp, resPath);
@@ -272,7 +274,7 @@ int main(int argc, char *argv[]) {
     std::cout << "Error parsing config: " << e.what() << std::endl;
     return 1;
   }
-  runFromConfig(runConfig);
+  runFromConfig(runConfig, argv[1]);
 
   return 0;
 }

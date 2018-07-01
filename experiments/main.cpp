@@ -14,9 +14,7 @@
 
 namespace fs = std::experimental::filesystem;
 
-using ExperimentGen = std::function<Context(std::ofstream &, std::ofstream &,
-                                            std::ofstream &, unsigned int,
-                                            size_t, size_t, size_t)>;
+using ExperimentGen = std::function<void(Context &, size_t)>;
 
 const std::unordered_map<std::string, ExperimentGen> setups = {
     {ExpOne::name, ExpOne::setup},
@@ -32,6 +30,35 @@ struct ExperimentConfig {
   size_t numPops;
   size_t numInds;
   size_t numCompetitions;
+  std::vector<std::vector<uint32_t>> compMap;
+  Context createContext(std::ofstream &out, std::ofstream &sOut,
+                        std::ofstream &iOut, unsigned int seed) {
+    Context ctx = makeDefaultContext(seed);
+    ctx.populationCount = numPops;
+
+    ctx.tournSize = 5;
+    ctx.popSize = numInds;
+    ctx.provisionalMap = compMap;
+
+    ctx.objectiveReportCallback = [&out](PopulationStats stats, uint32_t popId,
+                                         size_t gen) {
+      out << gen << "," << popId << "," << stats << std::endl;
+    };
+
+    ctx.subjectiveReportCallback = [&sOut](PopulationStats stats,
+                                           uint32_t popId, size_t gen) {
+      sOut << gen << "," << popId << "," << stats << std::endl;
+    };
+
+    ctx.individualReportCallback = [&iOut](std::string s, uint32_t popId,
+                                           size_t gen) {
+      iOut << gen << ',' << popId << "," << s << std::endl;
+    };
+
+    ctxGen(ctx, numCompetitions);
+
+    return ctx;
+  }
 };
 
 struct RunConfig {
@@ -105,7 +132,7 @@ void runExperiment(ExperimentConfig exp, fs::path resPath) {
 
     unsigned int seed = std::random_device()();
     seeds.push_back(seed);
-    evolve(600, exp.ctxGen(oFile, sFile, iFile, seed, exp.numPops, exp.numInds, exp.numCompetitions));
+    evolve(600, exp.createContext(oFile, sFile, iFile, seed));
 
     oFile.close();
     sFile.close();
@@ -208,6 +235,16 @@ RunConfig parseTomlConfig(fs::path configFile) {
       eConfig.numCompetitions = *numComps;
     } else {
       throw std::runtime_error{"numComps must be specified"};
+    }
+
+    std::vector<std::vector<uint32_t>> provisionalCompMap;
+    auto popMap = table->get_array_of<cpptoml::array>("popMap");
+    if (popMap) {
+      for (size_t i = 0; i < eConfig.numPops; ++i) {
+        auto p = (*popMap)[i]->get_array_of<int64_t>();
+        provisionalCompMap.emplace_back(p->begin(), p->end());
+      }
+      eConfig.compMap = provisionalCompMap;
     }
 
     rConfig.experiments.push_back(eConfig);

@@ -7,6 +7,11 @@ runs = 1
 numPops = 5
 numInds = 10
 numComps = 15
+popMap = [ [1],
+           [2],
+           [3],
+           [4],
+           [0]]
 
 [[experiments]]
 game = "ExpTwo"

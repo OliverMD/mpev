@@ -72,10 +72,7 @@ Individual mutateOnesInd(Context &ctx, Individual &a) {
   return {std::make_unique<Rep>(std::array<std::vector<bool>, 1>{r}), 0};
 }
 
-Context setup(std::ofstream &out, std::ofstream &sOut, std::ofstream &iOut,
-              unsigned int seed, size_t popCount, size_t popSize, size_t numComps) {
-  Context ctx = makeDefaultContext(seed);
-  ctx.tournSize = 5;
+void setup(Context &ctx, size_t numComps) {
   ctx.mutationFunc = ExpOne::mutateOnesInd;
   ctx.crossoverFunc = ExpOne::crossOnesInds;
   ctx.individualMaker = ExpOne::makeOnesInd;
@@ -83,34 +80,14 @@ Context setup(std::ofstream &out, std::ofstream &sOut, std::ofstream &iOut,
   ctx.varySelectorCreator = createRouletteSelect;
   ctx.survivalSelectorCreator = createRouletteSelect;
 
+  ctx.fitnessManager = std::make_unique<
+      CoevFitnessManager<DefaultFitnessEv<ExpOne::fitnessFunc>>>(
+      ctx, ctx.populationCount, numComps);
+
   ctx.objectiveFunc = [](const IndividualRep *rep) {
     const ExpOne::Rep *a = dynamic_cast<const ExpOne::Rep *>(rep);
     return a->getNumOnes(0);
   };
-
-  ctx.popSize = popSize;
-
-  ctx.fitnessManager = std::make_unique<
-      CoevFitnessManager<DefaultFitnessEv<ExpOne::fitnessFunc>>>(ctx, popCount,
-                                                                 numComps);
-  ctx.populationCount = popCount;
-
-  ctx.objectiveReportCallback = [&out](PopulationStats stats, uint32_t popId,
-                                       size_t gen) {
-    out << gen << "," << popId << "," << stats << std::endl;
-  };
-
-  ctx.subjectiveReportCallback = [&sOut](PopulationStats stats, uint32_t popId,
-                                         size_t gen) {
-    sOut << gen << "," << popId << "," << stats << std::endl;
-  };
-
-  ctx.individualReportCallback = [&iOut](std::string s, uint32_t popId,
-                                         size_t gen) {
-    iOut << gen << ',' << popId << "," << s << std::endl;
-  };
-
-  return ctx;
 }
 
 } // namespace ExpOne

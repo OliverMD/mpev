@@ -28,16 +28,17 @@ float fitnessFunc(const IndividualRep *a, const IndividualRep *b) {
   return aa->getNumOnes(dim) > bb->getNumOnes(dim) ? 1.0 : 0.0;
 }
 
-Context setup(std::ofstream &out, std::ofstream &sOut, std::ofstream &iOut,
-              unsigned int seed, size_t popCount, size_t popSize, size_t numComps) {
-  Context ctx = makeDefaultContext(seed);
-  ctx.tournSize = 5;
+void setup(Context &ctx, size_t numComps) {
   ctx.mutationFunc = ExpTwo::mutateOnesInd;
   ctx.crossoverFunc = ExpTwo::crossOnesInds;
   ctx.individualMaker = ExpTwo::makeOnesInd;
 
   ctx.varySelectorCreator = createRouletteSelect;
   ctx.survivalSelectorCreator = createRouletteSelect;
+
+  ctx.fitnessManager = std::make_unique<
+      CoevFitnessManager<DefaultFitnessEv<ExpThree::fitnessFunc>>>(
+      ctx, ctx.populationCount, numComps);
 
   ctx.objectiveFunc = [](const IndividualRep *rep) {
     const Rep *a = dynamic_cast<const Rep *>(rep);
@@ -47,30 +48,6 @@ Context setup(std::ofstream &out, std::ofstream &sOut, std::ofstream &iOut,
     }
     return total;
   };
-
-  ctx.popSize = popSize;
-
-  ctx.fitnessManager = std::make_unique<
-      CoevFitnessManager<DefaultFitnessEv<ExpThree::fitnessFunc>>>(
-      ctx, popCount, 15);
-  ctx.populationCount = popCount;
-
-  ctx.objectiveReportCallback = [&out](PopulationStats stats, uint32_t popId,
-                                       size_t gen) {
-    out << gen << "," << popId << "," << stats << std::endl;
-  };
-
-  ctx.subjectiveReportCallback = [&sOut](PopulationStats stats, uint32_t popId,
-                                         size_t gen) {
-    sOut << gen << "," << popId << "," << stats << std::endl;
-  };
-
-  ctx.individualReportCallback = [&iOut](std::string s, uint32_t popId,
-                                         size_t gen) {
-    iOut << gen << ',' << popId << "," << s << std::endl;
-  };
-
-  return ctx;
 }
 
 }

@@ -4,6 +4,11 @@
 
 #pragma once
 
+#include <array>
+#include <sstream>
+
+#include "include/Individual.h"
+
 template <size_t size, size_t Dimensions>
 class OnesIndRep : public IndividualRep {
 public:

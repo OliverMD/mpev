@@ -12,6 +12,8 @@ Uses C++17
 CMakeLists.txt will download googletest (https://github.com/google/googletest)
 
 [cpptoml](https://github.com/skystrife/cpptoml)
+folly
+glog
 
 Tested on MacOS High Sierra with Clang 5.0.0 installed from brew
 

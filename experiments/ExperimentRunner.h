@@ -14,7 +14,7 @@ namespace fs = std::experimental::filesystem;
 
 using ExperimentGen = std::function<void(Context &, size_t)>;
 
-const std::unordered_map<std::string, ExperimentGen> setups;
+//const std::unordered_map<std::string, ExperimentGen> setups;
 
 struct ExperimentConfig {
   std::string game;
@@ -63,9 +63,9 @@ struct RunConfig {
 
 void evolve(size_t numGens, Context ctx);
 
-void runExperiment(ExperimentConfig exp, fs::path resPath);
+int runExperiment(ExperimentConfig exp, fs::path resPath);
 
-void runFromConfig(RunConfig cfg, std::string configFile);
+void runFromConfig(RunConfig cfg, std::string configFile, size_t numThreads);
 
 RunConfig parseTomlConfig(fs::path configFile);
 

@@ -5,6 +5,8 @@
 
 #include "OnesInd.h"
 #include "include/Selectors.h"
+#include "include/Individual.h"
+#include "include/Fitness.h"
 
 namespace ExpOne {
 

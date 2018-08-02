@@ -7,8 +7,18 @@
 #include <vector>
 #include <thread>
 #include <cpptoml.h>
+#include <folly/futures/Future.h>
+#include <folly/executors/Async.h>
 
 #include "ExperimentRunner.h"
+#include "ExperimentOne.h"
+#include "ExperimentTwo.h"
+#include "ExperimentThree.h"
+
+const std::unordered_map<std::string, ExperimentGen> setups = {
+    {ExpOne::name, ExpOne::setup},
+    {ExpTwo::name, ExpTwo::setup},
+    {ExpThree::name, ExpThree::setup}};
 
 void evolve(size_t numGens, Context ctx) {
   std::vector<size_t> gens;
@@ -49,7 +59,7 @@ void evolve(size_t numGens, Context ctx) {
   }
 }
 
-void runExperiment(ExperimentConfig exp, fs::path resPath) {
+int runExperiment(ExperimentConfig exp, fs::path resPath) {
   fs::path thisResPath = resPath;
   thisResPath.append(exp.name);
   fs::create_directories(thisResPath);
@@ -98,22 +108,22 @@ void runExperiment(ExperimentConfig exp, fs::path resPath) {
   readmeFile << std::endl;
 
   readmeFile.close();
+  return 0;
 }
 
-void runFromConfig(RunConfig cfg, std::string configFile) {
+void runFromConfig(RunConfig cfg, std::string configFile, size_t numThreads) {
   const auto resPath = fs::path{cfg.rootResultsLoc};
   fs::create_directories(resPath);
   fs::copy_file(fs::path{configFile},
   fs::path{cfg.rootResultsLoc}.append("config.toml"));
-  std::vector<std::thread> threads;
-  for (const auto &exp : cfg.experiments) {
-    std::thread nt(runExperiment, exp, resPath);
-    threads.push_back(std::move(nt));
-  }
 
-  for (auto& th: threads) {
-    th.join();
+  std::vector<folly::Future<int>> expFutures;
+
+  for (const auto &exp : cfg.experiments) {
+    expFutures.emplace_back(folly::async(std::bind(runExperiment, exp, resPath)));
   }
+  auto all = folly::collectAll(expFutures);
+  all.wait();
 }
 
 RunConfig parseTomlConfig(fs::path configFile) {

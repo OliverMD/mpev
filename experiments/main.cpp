@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
     std::cout << "Error parsing config: " << e.what() << std::endl;
     return 1;
   }
-  runFromConfig(runConfig, argv[1]);
+  runFromConfig(runConfig, argv[1], 8);
 
   return 0;
 }

@@ -61,6 +61,10 @@ include_directories(AFTER
         ${gtest_SOURCE_DIR}/include
         ${gmock_SOURCE_DIR}/include)
 
+find_library(FOLLY_LIB Folly)
+find_path(FOLLY_INCLUDES Folly)
+
+find_package(glog 0.3.5 REQUIRED)
 enable_testing()
 
 add_subdirectory(src)

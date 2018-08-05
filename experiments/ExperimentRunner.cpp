@@ -4,11 +4,16 @@
 
 #include "include/PopulationStates.h"
 
-#include <vector>
-#include <thread>
 #include <cpptoml.h>
-#include <folly/futures/Future.h>
+#include <folly/Executor.h>
+#include <folly/Try.h>
 #include <folly/executors/Async.h>
+#include <folly/executors/CPUThreadPoolExecutor.h>
+#include <folly/executors/GlobalExecutor.h>
+#include <folly/futures/Future.h>
+#include <iostream>
+#include <thread>
+#include <vector>
 
 #include "ExperimentRunner.h"
 #include "ExperimentOne.h"
@@ -59,11 +64,14 @@ void evolve(size_t numGens, Context ctx) {
   }
 }
 
-int runExperiment(ExperimentConfig exp, fs::path resPath) {
+std::vector<folly::SemiFuture<int>> runExperiment(ExperimentConfig exp,
+                                                  fs::path resPath) {
   fs::path thisResPath = resPath;
   thisResPath.append(exp.name);
   fs::create_directories(thisResPath);
   std::vector<unsigned int> seeds;
+
+  std::vector<folly::SemiFuture<int>> futures;
 
   for (uint i = 0; i < exp.numRuns; ++i) {
     const std::string obFilename =
@@ -86,11 +94,22 @@ int runExperiment(ExperimentConfig exp, fs::path resPath) {
 
     unsigned int seed = std::random_device()();
     seeds.push_back(seed);
-    evolve(600, exp.createContext(oFile, sFile, iFile, seed));
 
-    oFile.close();
-    sFile.close();
-    iFile.close();
+    std::pair<folly::Promise<int>, folly::SemiFuture<int>> pf =
+        folly::makePromiseContract<int>();
+    folly::Promise<int> p{std::move(pf.first)};
+    folly::getCPUExecutor()->add([
+          &, p = std::move(p), of = std::move(oFile), sf = std::move(sFile),
+          ifi = std::move(iFile)
+    ]() mutable {
+      evolve(600, exp.createContext(of, sf, ifi, seed));
+
+      of.close();
+      sf.close();
+      ifi.close();
+      p.setValue(0);
+    });
+    futures.emplace_back(std::move(pf.second));
   }
   std::ofstream readmeFile{thisResPath.append("readme.txt"), std::ios::out};
   readmeFile << exp.game << std::endl << std::endl;
@@ -108,7 +127,7 @@ int runExperiment(ExperimentConfig exp, fs::path resPath) {
   readmeFile << std::endl;
 
   readmeFile.close();
-  return 0;
+  return futures;
 }
 
 void runFromConfig(RunConfig cfg, std::string configFile, size_t numThreads) {
@@ -117,13 +136,13 @@ void runFromConfig(RunConfig cfg, std::string configFile, size_t numThreads) {
   fs::copy_file(fs::path{configFile},
   fs::path{cfg.rootResultsLoc}.append("config.toml"));
 
-  std::vector<folly::Future<int>> expFutures;
+  std::vector<folly::SemiFuture<std::vector<folly::Try<int>>>> expFutures;
 
   for (const auto &exp : cfg.experiments) {
-    expFutures.emplace_back(folly::async(std::bind(runExperiment, exp, resPath)));
+    expFutures.emplace_back(
+        folly::collectAllSemiFuture(runExperiment(exp, resPath)));
   }
-  auto all = folly::collectAll(expFutures);
-  all.wait();
+  folly::collectAll(expFutures).wait();
 }
 
 RunConfig parseTomlConfig(fs::path configFile) {

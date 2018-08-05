@@ -8,8 +8,10 @@
 #include <include/Context.h>
 
 #include <experimental/filesystem>
+#include <folly/futures/Future.h>
 #include <fstream>
 #include <unordered_map>
+
 namespace fs = std::experimental::filesystem;
 
 using ExperimentGen = std::function<void(Context &, size_t)>;
@@ -63,7 +65,8 @@ struct RunConfig {
 
 void evolve(size_t numGens, Context ctx);
 
-int runExperiment(ExperimentConfig exp, fs::path resPath);
+std::vector<folly::SemiFuture<int>> runExperiment(ExperimentConfig exp,
+                                                  fs::path resPath);
 
 void runFromConfig(RunConfig cfg, std::string configFile, size_t numThreads);
 

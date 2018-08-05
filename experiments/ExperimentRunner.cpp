@@ -11,6 +11,7 @@
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/executors/GlobalExecutor.h>
 #include <folly/futures/Future.h>
+#include <folly/futures/helpers.h>
 #include <iostream>
 #include <thread>
 #include <vector>
@@ -135,12 +136,26 @@ void runFromConfig(RunConfig cfg, std::string configFile, size_t numThreads) {
   fs::create_directories(resPath);
   fs::copy_file(fs::path{configFile},
   fs::path{cfg.rootResultsLoc}.append("config.toml"));
+  uint numExps = 0;
+  for (auto &e : cfg.experiments) {
+    numExps += e.numRuns;
+  }
 
-  std::vector<folly::SemiFuture<std::vector<folly::Try<int>>>> expFutures;
-
+  std::vector<folly::SemiFuture<std::vector<folly::Try<folly::Unit>>>>
+      expFutures;
+  std::atomic<uint> finished = 0;
   for (const auto &exp : cfg.experiments) {
-    expFutures.emplace_back(
-        folly::collectAllSemiFuture(runExperiment(exp, resPath)));
+    std::vector<folly::Future<folly::Unit>> results;
+    std::vector<folly::SemiFuture<int>> sfs = runExperiment(exp, resPath);
+    for (auto it = sfs.begin(); it != sfs.end(); it++) {
+      results.emplace_back(
+          std::move(*it).via(folly::getCPUExecutor().get()).then([&](int a) {
+            finished += 1;
+            LOG(INFO) << "Finished experiment: " << exp.name << " - "
+                      << finished << "/" << numExps;
+          }));
+    }
+    expFutures.emplace_back(folly::collectAll(results));
   }
   folly::collectAll(expFutures).wait();
 }

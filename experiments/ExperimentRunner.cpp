@@ -153,7 +153,7 @@ void runFromConfig(RunConfig cfg, std::string configFile) {
     std::vector<folly::SemiFuture<int>> sfs = runExperiment(exp, resPath);
     for (auto it = sfs.begin(); it != sfs.end(); it++) {
       results.emplace_back(
-          std::move(*it).via(folly::getCPUExecutor().get()).then([&](int a) {
+          std::move(*it).via(folly::getIOExecutor().get()).then([&](int a) {
             finished += 1;
             LOG(INFO) << "Finished experiment: " << exp.name << " - "
                       << finished << "/" << numExps;

@@ -68,7 +68,7 @@ void evolve(size_t numGens, Context ctx);
 std::vector<folly::SemiFuture<int>> runExperiment(ExperimentConfig exp,
                                                   fs::path resPath);
 
-void runFromConfig(RunConfig cfg, std::string configFile, size_t numThreads);
+void runFromConfig(RunConfig cfg, std::string configFile);
 
 RunConfig parseTomlConfig(fs::path configFile);
 

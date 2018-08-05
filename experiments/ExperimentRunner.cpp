@@ -131,11 +131,15 @@ std::vector<folly::SemiFuture<int>> runExperiment(ExperimentConfig exp,
   return futures;
 }
 
-void runFromConfig(RunConfig cfg, std::string configFile, size_t numThreads) {
+void runFromConfig(RunConfig cfg, std::string configFile) {
   const auto resPath = fs::path{cfg.rootResultsLoc};
-  fs::create_directories(resPath);
-  fs::copy_file(fs::path{configFile},
-  fs::path{cfg.rootResultsLoc}.append("config.toml"));
+  try {
+    fs::create_directories(resPath);
+    fs::copy_file(fs::path{configFile},
+                  fs::path{cfg.rootResultsLoc}.append("config.toml"));
+  } catch (std::exception &e) {
+    LOG(FATAL) << "Could not copy config file: " << e.what();
+  }
   uint numExps = 0;
   for (auto &e : cfg.experiments) {
     numExps += e.numRuns;

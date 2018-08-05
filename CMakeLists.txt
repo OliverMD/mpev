@@ -64,6 +64,7 @@ include_directories(AFTER
 find_library(FOLLY_LIB Folly)
 find_path(FOLLY_INCLUDES Folly)
 
+find_package(gflags REQUIRED)
 find_package(glog 0.3.5 REQUIRED)
 enable_testing()
 

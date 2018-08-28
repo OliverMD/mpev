@@ -100,7 +100,7 @@ std::vector<folly::SemiFuture<int>> runExperiment(ExperimentConfig exp,
         folly::makePromiseContract<int>();
     folly::Promise<int> p{std::move(pf.first)};
     folly::getCPUExecutor()->add([
-          &, p = std::move(p), of = std::move(oFile), sf = std::move(sFile),
+          =, p = std::move(p), of = std::move(oFile), sf = std::move(sFile),
           ifi = std::move(iFile)
     ]() mutable {
       evolve(600, exp.createContext(of, sf, ifi, seed));
